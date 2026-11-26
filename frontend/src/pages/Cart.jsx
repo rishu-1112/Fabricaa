@@ -86,7 +86,7 @@ export default function Cart() {
             </button>
             <Link to="/checkout">
               <button className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
-                Proceed to Checkout
+                Request a Quote
               </button>
             </Link>
           </div>

@@ -1,3 +1,4 @@
+import { apiUrl } from "../services/api";
 import React, { useEffect, useState } from "react";
 
 const Showcase = () => {
@@ -7,7 +8,7 @@ const Showcase = () => {
   useEffect(() => {
     const fetchFabrics = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/fabrics");
+        const res = await fetch(apiUrl("/fabrics"));
         const data = await res.json();
         setFabrics(data);
       } catch (error) {

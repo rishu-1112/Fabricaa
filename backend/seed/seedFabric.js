@@ -1,10 +1,6 @@
-import mongoose from "mongoose";
+import "dotenv/config";
 import Fabric from "../models/fabric.js";
-
-// Prefer an environment variable but fall back to localhost for convenience.
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/textileDB";
-console.log("🌱 Seeding fabric data using URI:", MONGO_URI);
-
+import seedCatalog from "./seedCatalog.js";
 
 const fabrics = [
   {
@@ -109,20 +105,9 @@ const fabrics = [
   },
 ];
 
-const seedDB = async () => {
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log("✅ MongoDB connected — starting seed");
-
-    await Fabric.deleteMany({});
-    await Fabric.insertMany(fabrics);
-    console.log("🌸 Fabric data seeded successfully!");
-  } catch (err) {
-    console.error("❌ Seeding error:", err);
-  } finally {
-    await mongoose.disconnect();
-    console.log("🔌 MongoDB connection closed");
-  }
-};
-
-seedDB();
+try {
+  await seedCatalog(Fabric, fabrics);
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = 1;
+}

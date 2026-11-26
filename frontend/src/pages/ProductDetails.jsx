@@ -1,3 +1,4 @@
+import { apiUrl } from "../services/api";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -17,7 +18,7 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const res = await axios.get(apiUrl(`/products/${id}`));
         setProduct(res.data);
         setMainImage(res.data.imageUrl);
       } catch (error) {

@@ -1,3 +1,4 @@
+import { apiUrl } from "../services/api";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ProductCard from "../components/ProductCard";
@@ -21,7 +22,7 @@ export default function Products() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await axios.get(apiUrl("/products"));
         setProducts(res.data);
         setFiltered(res.data);
       } catch (error) {

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const ProductCard = ({ product, onAddToCart, onViewDetails }) => {
+const ProductCard = ({ product, onAddToCart }) => {
   const discount =
     product.discountPrice &&
     Math.round(((product.price - product.discountPrice) / product.price) * 100);

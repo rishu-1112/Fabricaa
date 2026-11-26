@@ -1,7 +1,10 @@
 import express from "express";
+import requireAdmin from "../middleware/requireAdmin.js";
+import validateCatalogFields from "../middleware/validateCatalogFields.js";
 import Product from "../models/productModel.js";
 
 const router = express.Router();
+const validateFields = validateCatalogFields(["name", "description", "category", "material", "imageUrl", "gallery", "price", "discountPrice", "inStock", "stockCount", "isFeatured"]);
 
 // GET all products
 router.get("/", async (req, res) => {
@@ -25,7 +28,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST - Create new product (Admin)
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, validateFields, async (req, res) => {
   try {
     const product = new Product(req.body);
     const created = await product.save();
@@ -36,11 +39,13 @@ router.post("/", async (req, res) => {
 });
 
 // PUT - Update product (Admin)
-router.put("/:id", async (req, res) => {
+router.put("/:id", requireAdmin, validateFields, async (req, res) => {
   try {
     const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runValidators: true,
     });
+    if (!updated) return res.status(404).json({ message: "Product not found" });
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: "Failed to update product", error: err });
@@ -48,9 +53,10 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE - Remove product (Admin)
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
+    const deleted = await Product.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Product not found" });
     res.json({ message: "Product deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Error deleting product", error: err });

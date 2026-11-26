@@ -1,3 +1,4 @@
+import { apiUrl } from "../services/api";
 import React,{useState} from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Instagram, Linkedin, Facebook } from "lucide-react";
@@ -12,7 +13,7 @@ export default function Contact() {
     e.preventDefault();
     setStatus("Sending...");
     try {
-      const res = await fetch("http://localhost:5000/api/contact", {
+      const res = await fetch(apiUrl("/contact"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -25,7 +26,7 @@ export default function Contact() {
         // clear status after a while
         setTimeout(() => setStatus(""), 5000);
       } else setStatus(`❌ ${data.error || "Something went wrong."}`);
-    } catch (err) {
+    } catch {
       setStatus("❌ Error sending message. Try again later.");
     }
   };
@@ -83,6 +84,7 @@ export default function Contact() {
           <div className="grid md:grid-cols-2 gap-4">
             <input
               name="name"
+              maxLength={100}
               value={form.name}
               onChange={handleChange}
               type="text"
@@ -91,6 +93,7 @@ export default function Contact() {
             />
             <input
               name="email"
+              maxLength={254}
               value={form.email}
               onChange={handleChange}
               type="email"
@@ -100,6 +103,7 @@ export default function Contact() {
           </div>
           <textarea
             name="message"
+              maxLength={2000}
             value={form.message}
             onChange={handleChange}
             rows="5"

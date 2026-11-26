@@ -1,7 +1,10 @@
 import express from "express";
+import requireAdmin from "../middleware/requireAdmin.js";
+import validateCatalogFields from "../middleware/validateCatalogFields.js";
 import Fabric from "../models/fabric.js";
 
 const router = express.Router();
+const validateFields = validateCatalogFields(["name", "material", "description", "imageUrl", "videoUrl", "category"]);
 
 // GET all fabrics
 router.get("/", async (req, res) => {
@@ -14,7 +17,7 @@ router.get("/", async (req, res) => {
 });
 
 // POST a new fabric
-router.post("/", async (req, res) => {
+router.post("/", requireAdmin, validateFields, async (req, res) => {
   try {
     const newFabric = new Fabric(req.body);
     const savedFabric = await newFabric.save();

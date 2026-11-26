@@ -1,5 +1,6 @@
 import React from "react";
-import heroVideo from "../assets/fabric-bg.mp4"; // add your fabric video here
+import heroVideo from "../assets/fabric-bg.mp4";
+import heroPoster from "../assets/fabric-poster.webp";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -9,6 +10,8 @@ const Hero = () => {
         autoPlay
         loop
         muted
+        playsInline
+        poster={heroPoster}
         className="absolute inset-0 w-full h-full object-cover"
         src={heroVideo}
       />
