@@ -48,8 +48,8 @@ function ProductView({ id }) {
     return (
       <section className="space-y-4 px-6 py-20 text-center">
         <p role="status">{messages[status]}</p>
-        {status === "unavailable" && <button className="mr-5 text-indigo-700 underline" onClick={() => { setStatus("loading"); setAttempt(attempt + 1); }}>Try again</button>}
-        <Link to="/products" className="text-indigo-700 underline">Browse fabrics</Link>
+        {status === "unavailable" && <button className="mr-5 text-emerald-700 underline" onClick={() => { setStatus("loading"); setAttempt(attempt + 1); }}>Try again</button>}
+        <Link to="/products" className="text-emerald-700 underline">Browse fabrics</Link>
       </section>
     );
   }
@@ -66,24 +66,24 @@ function ProductView({ id }) {
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
-      <Link to={sampleFilter ? "/products?sample=1" : "/products"} className="mb-7 inline-flex items-center gap-2 text-indigo-700 hover:underline"><ArrowLeft size={18} /> Browse fabrics</Link>
+      <Link to={sampleFilter ? "/products?sample=1" : "/products"} className="mb-7 inline-flex items-center gap-2 text-emerald-700 hover:underline"><ArrowLeft size={18} /> Browse fabrics</Link>
       <div className="grid gap-10 md:grid-cols-2">
         <div>
           <FabricImage src={images[imageIndex]} category={product.category} alt={product.name} className="aspect-square w-full rounded-2xl object-cover" />
           {images.length > 1 && <div className="mt-4 flex flex-wrap gap-3">
             {images.map((image, index) => (
-              <button key={image} type="button" aria-label={`View image ${index + 1}`} aria-pressed={index === imageIndex} onClick={() => setImageIndex(index)} className={`overflow-hidden rounded-lg border-2 ${index === imageIndex ? "border-indigo-700" : "border-transparent"}`}>
+              <button key={image} type="button" aria-label={`View image ${index + 1}`} aria-pressed={index === imageIndex} onClick={() => setImageIndex(index)} className={`overflow-hidden rounded-lg border-2 ${index === imageIndex ? "border-emerald-700" : "border-transparent"}`}>
                 <FabricImage src={image} category={product.category} alt="" className="h-16 w-16 object-cover" />
               </button>
             ))}
           </div>}
         </div>
         <div className="space-y-5">
-          <p className="text-sm font-semibold text-indigo-700">{product.category}{product.sample ? " · Sample fabric" : ""}</p>
+          <p className="text-sm font-semibold text-emerald-700">{product.category}{product.sample ? " · Sample fabric" : ""}</p>
           <h1 className="text-4xl font-bold">{product.name}</h1>
           <p className="text-gray-600">{product.description}</p>
           <p className="flex items-baseline gap-3 font-semibold">
-            <span className="text-2xl text-indigo-700">₹{price.toLocaleString("en-IN")}</span>
+            <span className="text-2xl text-emerald-700">₹{price.toLocaleString("en-IN")}</span>
             {price < product.price && <del className="text-gray-500">₹{product.price.toLocaleString("en-IN")}</del>}
             {product.sample && <span className="text-sm text-gray-600">illustrative price</span>}
           </p>
@@ -100,13 +100,13 @@ function ProductView({ id }) {
                 {Array.from({ length: Math.min(remaining, 50) }, (_, index) => <option key={index + 1}>{index + 1}</option>)}
               </select>
             </label>}
-            <button type="button" disabled={!remaining} onClick={() => addToCart(product, selectedQuantity)} className="flex items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2.5 font-semibold text-white disabled:bg-gray-200 disabled:text-gray-600">
+            <button type="button" disabled={!remaining} onClick={() => addToCart(product, selectedQuantity)} className="flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 font-semibold text-white disabled:bg-gray-200 disabled:text-gray-600">
               <ShoppingBag size={18} /> {remaining ? "Add to cart" : stock ? "Stock limit reached" : "Out of stock"}
             </button>
-            <button type="button" aria-pressed={isSaved} onClick={() => toggleSaved(product)} className="flex items-center gap-2 rounded-lg border border-indigo-200 px-4 py-2.5 text-indigo-700"><Heart size={18} fill={isSaved ? "currentColor" : "none"} /> {isSaved ? "Saved" : "Save"}</button>
+            <button type="button" aria-pressed={isSaved} onClick={() => toggleSaved(product)} className="flex items-center gap-2 rounded-lg border border-emerald-200 px-4 py-2.5 text-emerald-700"><Heart size={18} fill={isSaved ? "currentColor" : "none"} /> {isSaved ? "Saved" : "Save"}</button>
           </div>
-          {inCart > 0 && <p role="status"><Link to="/cart" className="text-sm font-semibold text-indigo-700 underline">{inCart} in your cart</Link></p>}
-          <div className="flex flex-wrap gap-4 text-sm text-indigo-700">
+          {inCart > 0 && <p role="status"><Link to="/cart" className="text-sm font-semibold text-emerald-700 underline">{inCart} in your cart</Link></p>}
+          <div className="flex flex-wrap gap-4 text-sm text-emerald-700">
             <Link to={`/products?${sampleFilter}category=${encodeURIComponent(product.category)}`} className="underline">More {product.category} fabrics</Link>
             {!product.sample && <Link to={`/contact?topic=swatches&fabric=${encodeURIComponent(product.name)}`} className="underline">Ask for a swatch</Link>}
           </div>

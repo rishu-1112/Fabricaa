@@ -1,41 +1,29 @@
-import React from "react";
-import processVdo from "../assets/processFibre.mp4";
-
+import { Link } from "react-router-dom";
 
 const steps = [
-  { title: "Spinning", desc: "Transforming raw fibers into fine threads." },
-  { title: "Weaving", desc: "Interlacing threads to form durable fabric." },
-  { title: "Dyeing", desc: "Adding rich colors through eco-friendly processes." },
-  { title: "Finishing", desc: "Perfecting texture, shine, and softness." },
+  { title: "Spinning", description: "Transforming raw fibres into fine threads." },
+  { title: "Weaving", description: "Interlacing threads to form durable fabric." },
+  { title: "Dyeing", description: "Applying colour to achieve the intended shade." },
+  { title: "Finishing", description: "Refining the fabric’s texture, sheen, and feel." },
 ];
 
-const Process = () => (
-  <section className="relative overflow-hidden bg-gray-50 py-20">
-    {/* Background video (decorative) */}
-    <video
-      className="absolute inset-0 w-full h-full object-cover opacity-40 pointer-events-none"
-      src={processVdo}
-      autoPlay
-      muted
-      loop
-      playsInline
-      aria-hidden="true"
-    />
-    {/* optional overlay to darken the video for better text contrast */}
-    <div className="absolute inset-0 bg-black/20 pointer-events-none" />
-
-    <div className="relative z-10">
-      <h2 className="text-3xl font-bold text-center mb-10">Our Crafting Process</h2>
-      <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8 px-6 text-center">
-        {steps.map((s, i) => (
-          <div key={i} className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
-            <h3 className="text-xl font-semibold mb-2">{s.title}</h3>
-            <p className="text-gray-600">{s.desc}</p>
-          </div>
-        ))}
+export default function Process() {
+  return (
+    <section className="paper px-6 py-14">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="display-title text-4xl">From Fibre to Fabric</h2>
+          <Link to="/about" className="font-semibold text-emerald-800 underline underline-offset-4">See the process video</Link>
+        </div>
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map(({ title, description }) => (
+            <li key={title} className="rounded-xl border border-stone-200 bg-white p-5">
+              <h3 className="font-semibold">{title}</h3>
+              <p className="mt-2 text-sm text-stone-600">{description}</p>
+            </li>
+          ))}
+        </ul>
       </div>
-    </div>
-  </section>
-);
-
-export default Process;
+    </section>
+  );
+}

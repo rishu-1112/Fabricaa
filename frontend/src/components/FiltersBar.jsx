@@ -8,7 +8,7 @@ export default function FiltersBar({ categories, category, sort, inStock, savedO
             type="button"
             aria-pressed={category === name}
             onClick={() => updateFilter("category", name === "All" ? "" : name)}
-            className={`rounded-full border px-4 py-2 text-sm font-medium ${category === name ? "border-indigo-700 bg-indigo-700 text-white" : "border-gray-200 bg-white hover:bg-indigo-50"}`}
+            className={`rounded-full border px-4 py-2 text-sm font-medium ${category === name ? "border-emerald-700 bg-emerald-700 text-white" : "border-gray-200 bg-white hover:bg-emerald-50"}`}
           >
             {name}
           </button>

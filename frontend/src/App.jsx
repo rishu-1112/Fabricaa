@@ -24,9 +24,10 @@ function App() {
   return (
     <Router>
       <ScrollToPage />
-      <div className="min-h-screen flex flex-col bg-gray-50 text-gray-800">
+      <div className="paper min-h-screen flex flex-col text-stone-900">
+        <a href="#main-content" className="sr-only z-50 rounded bg-white px-4 py-2 text-emerald-950 focus:not-sr-only focus:fixed focus:left-4 focus:top-3">Skip to content</a>
         <Navbar />
-        <main className="flex-grow">
+        <main id="main-content" tabIndex={-1} className="flex-grow scroll-mt-24">
           <Suspense fallback={<p role="status" className="p-6">Loading page…</p>}>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -39,7 +40,7 @@ function App() {
               <Route path="*" element={
                 <section className="space-y-5 px-6 py-20 text-center">
                   <h1 className="text-3xl font-semibold">Page not found</h1>
-                  <Link to="/products" className="text-indigo-700 underline">Browse fabrics</Link>
+                  <Link to="/products" className="text-emerald-700 underline">Browse fabrics</Link>
                 </section>
               } />
             </Routes>

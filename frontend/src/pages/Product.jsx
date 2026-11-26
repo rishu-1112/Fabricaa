@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
 import FiltersBar from "../components/FiltersBar";
 import { availableQuantity, isDemoMode, itemPrice } from "../services/catalog";
+import { matchesFabricSearch } from "../services/catalog";
 import useCatalog from "../services/useCatalog";
 import { fabricCategories } from "../data/sampleCatalog";
 
@@ -19,11 +20,10 @@ export default function Products() {
   const savedOnly = params.get("saved") === "1";
   const source = savedOnly ? saved : products;
   const categories = [...new Set([...fabricCategories.map(({ name }) => name), ...source.map((item) => item.category)])].filter(Boolean);
-  const search = query.trim().toLowerCase();
   const visible = source.filter((product) =>
     (category === "All" || product.category === category) &&
     (!stock || availableQuantity(product) > 0) &&
-    [product.name, product.material, product.category, product.description].join(" ").toLowerCase().includes(search)
+    matchesFabricSearch(product, query)
   );
   if (sort === "low") visible.sort((a, b) => itemPrice(a) - itemPrice(b));
   if (sort === "high") visible.sort((a, b) => itemPrice(b) - itemPrice(a));
@@ -38,17 +38,17 @@ export default function Products() {
   }
 
   return (
-    <section className="min-h-screen bg-gray-50 px-6 py-14">
+    <section className="paper min-h-screen px-6 py-12">
       <div className="mx-auto max-w-7xl">
-        <h1 className="text-4xl font-bold">Fabric Catalog</h1>
-        <p className="mt-3 text-gray-600">Find fabrics by fibre, weight, and intended use.</p>
+        <h1 className="display-title text-5xl sm:text-6xl">{savedOnly ? "Saved Fabrics" : "Fabric Catalog"}</h1>
+        <p className="mt-3 text-gray-600">{savedOnly ? "Compare the fabrics you’ve shortlisted." : "Find fabrics by fibre, weight, and intended use."}</p>
         {status === "sample" && !savedOnly && (
-          <div className="mt-5 rounded-lg bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+          <div className="mt-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             You’re viewing sample fabrics. Prices and availability are illustrative.
             {!isDemoMode && <Link to="/products" className="ml-3 font-semibold underline">Back to live catalog</Link>}
           </div>
         )}
-        <div className="my-7 space-y-5 rounded-2xl border border-gray-200 bg-white p-5">
+        <div className="my-7 space-y-5 rounded-2xl border border-stone-200 bg-white p-4 sm:p-5">
           <label className="flex items-center gap-3 rounded-lg border border-gray-300 px-4">
             <Search size={19} aria-hidden="true" />
             <input className="w-full bg-transparent py-3" type="search" aria-label="Search fabrics" placeholder="Search names, fibres or uses" value={query} onChange={(event) => updateFilter("q", event.target.value)} />
@@ -59,7 +59,7 @@ export default function Products() {
           !savedOnly && (status === "empty" || status === "unavailable") ? (
             <div className="space-y-4 rounded-xl bg-white p-8 text-center">
               <p role="status">{status === "empty" ? "There are no live fabrics in the catalog yet." : "The live catalog is temporarily unavailable."}</p>
-              <div className="flex flex-wrap justify-center gap-4 text-indigo-700">
+              <div className="flex flex-wrap justify-center gap-4 text-emerald-700">
                 {status === "unavailable" && <button type="button" className="underline" onClick={retry}>Try again</button>}
                 <Link to="/products?sample=1" className="underline">Browse sample fabrics</Link>
               </div>
@@ -68,7 +68,7 @@ export default function Products() {
           <>
             <div className="mb-5 flex items-center justify-between gap-4">
               <p role="status" className="text-sm text-gray-600">{visible.length} {visible.length === 1 ? "fabric" : "fabrics"}</p>
-              {[...params.keys()].some((key) => key !== "sample") && <Link to={resetUrl} className="text-sm font-semibold text-indigo-700 hover:underline">Clear filters</Link>}
+              {[...params.keys()].some((key) => key !== "sample") && <Link to={resetUrl} className="text-sm font-semibold text-emerald-700 hover:underline">Clear filters</Link>}
             </div>
             {visible.length ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

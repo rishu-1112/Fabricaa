@@ -1,33 +1,34 @@
-import React from "react";
-import heroVideo from "../assets/fabric-bg.mp4";
-import heroPoster from "../assets/fabric-poster.webp";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import heroPoster from "../assets/fabric-poster.webp";
 
-const Hero = () => {
+export default function Hero() {
   return (
-    <section className="relative w-full h-[90vh] flex items-center justify-center overflow-hidden">
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        poster={heroPoster}
-        className="absolute inset-0 w-full h-full object-cover"
-        src={heroVideo}
-      />
-      <div className="absolute inset-0 bg-black/40"></div>
-
-      <div className="relative z-10 text-center text-white px-4">
-        <h1 className="text-5xl font-extrabold mb-4 tracking-wide">
-          Innovating Textiles with Style & Soul
-        </h1>
-        <p className="max-w-2xl mx-auto text-lg mb-6">
-          Discover a world of premium fabrics, colors, and textures curated for modern fashion and design.
-        </p>
-        <Link to="/products" className="inline-block rounded-full bg-blue-700 px-8 py-3 font-medium text-white transition hover:bg-blue-800">Explore Fabrics</Link>
+    <section className="bg-emerald-950 text-white">
+      <div className="mx-auto grid max-w-7xl md:min-h-[35rem] md:grid-cols-[1fr_1.1fr]">
+        <div className="flex flex-col justify-center px-6 py-14 sm:px-10 md:py-20">
+          <h1 className="display-title max-w-xl text-5xl leading-[.98] sm:text-6xl lg:text-7xl">
+            Find the fabric for your next project.
+          </h1>
+          <p className="mt-6 max-w-md text-lg leading-relaxed text-emerald-50/80">
+            Compare fibres, save your favourites, and request a quote for the fabrics you need.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <Link to="/products" className="inline-flex items-center gap-3 rounded-full bg-white px-5 py-3 font-semibold text-emerald-950 hover:bg-emerald-50">
+              Explore fabrics <ArrowRight size={18} aria-hidden="true" />
+            </Link>
+            <Link to="/contact?topic=swatches" className="rounded-full px-4 py-3 font-semibold text-white underline underline-offset-4">
+              Ask about swatches
+            </Link>
+          </div>
+        </div>
+        <img
+          src={heroPoster}
+          alt="Fabric shown in close-up"
+          fetchPriority="high"
+          className="h-64 w-full object-cover sm:h-80 md:h-full"
+        />
       </div>
     </section>
   );
-};
-
-export default Hero;
+}

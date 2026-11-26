@@ -11,7 +11,7 @@ export default function Cart() {
     return (
       <div className="text-center py-20">
         <h2 className="text-3xl font-semibold text-gray-700 mb-4">Your cart is empty</h2>
-        <Link to="/products" className="text-indigo-600 hover:underline">
+        <Link to="/products" className="text-emerald-600 hover:underline">
           Browse Products
         </Link>
       </div>
@@ -38,7 +38,7 @@ export default function Cart() {
               <div className="flex-1 text-left">
                 <h3 className="text-lg font-semibold text-gray-800"><Link className="hover:underline" to={`/products/${item._id}`}>{item.name}</Link></h3>
                 <p className="text-gray-500">{item.material}{item.sample ? " · Sample fabric" : ""}</p>
-                <p className="text-indigo-600 font-semibold mt-2">
+                <p className="text-emerald-600 font-semibold mt-2">
                   ₹
                   {itemPrice(item).toLocaleString("en-IN")}
                 </p>
@@ -79,7 +79,7 @@ export default function Cart() {
         <div className="mt-10 flex flex-col sm:flex-row justify-between items-center border-t pt-6">
           <h3 className="text-lg font-medium text-gray-800">
             Estimated total ({totalItems} items):{" "}
-            <span className="text-indigo-600 font-semibold">
+            <span className="text-emerald-600 font-semibold">
               ₹{totalPrice.toLocaleString()}
             </span>
           </h3>
@@ -90,7 +90,7 @@ export default function Cart() {
             >
               Clear Cart
             </button>
-            <Link to="/checkout" className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+            <Link to="/checkout" className="px-6 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
               {cart.some((item) => item.sample) ? "Preview Sample Quote" : "Request a Quote"}
             </Link>
           </div>

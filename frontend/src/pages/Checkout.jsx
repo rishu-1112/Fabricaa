@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import { apiUrl } from "../services/api";
 
 const fieldClass = "w-full rounded-lg border border-gray-300 px-4 py-3";
-const buttonClass = "rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white disabled:opacity-50";
+const buttonClass = "rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white disabled:opacity-50";
 
 export default function Checkout() {
   const { cart, removeFromCart, updateQuantity } = useCart();
@@ -75,7 +75,7 @@ export default function Checkout() {
           <div className="space-y-4">
             <p>Your selection includes sample fabrics. Download it as a draft, or remove the samples from your cart to request a live quote.</p>
             <button type="button" className={buttonClass} onClick={downloadSample}>Download Sample Quote</button>
-            <Link to="/cart" className="block text-indigo-700 underline">Edit cart</Link>
+            <Link to="/cart" className="block text-emerald-700 underline">Edit cart</Link>
           </div>
         ) : <form onSubmit={submitQuote} className="space-y-5">
           <label className="block">
@@ -96,7 +96,7 @@ export default function Checkout() {
               {issues.map(({ id, name, available }) => (
                 <li key={id} className="flex flex-wrap items-center justify-between gap-2">
                   <span>{name || cart.find((item) => item._id === id)?.name} · {available ? `${available} available` : "Unavailable"}</span>
-                  <button type="button" className="text-indigo-700 underline" onClick={() => {
+                  <button type="button" className="text-emerald-700 underline" onClick={() => {
                     if (available) updateQuantity(id, available, available);
                     else removeFromCart(id);
                     setIssues((current) => current.filter((issue) => issue.id !== id));

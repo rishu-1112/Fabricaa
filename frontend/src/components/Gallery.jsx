@@ -25,7 +25,7 @@ export default function Gallery() {
   return (
     <section className="bg-white px-6 py-16">
       <div className="mx-auto max-w-6xl">
-        <h2 className="mb-8 text-3xl font-bold">Fabric Inspiration</h2>
+        <h2 className="mb-8 display-title text-4xl">Fabric Inspiration</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {projects.map((project, position) => (
             <button key={project.title} type="button" onClick={() => { setIndex(position); dialog.current.showModal(); }} className="group overflow-hidden rounded-xl border border-gray-200 text-left shadow-sm">
@@ -48,7 +48,7 @@ export default function Gallery() {
           <h3 id="gallery-title" className="text-xl font-semibold">{active.title}</h3>
           <p>{active.description}</p>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link to={`/products?category=${active.category}`} onClick={() => dialog.current.close()} className="font-semibold text-indigo-700 underline">Explore {active.category}</Link>
+            <Link to={`/products?category=${active.category}`} onClick={() => dialog.current.close()} className="font-semibold text-emerald-700 underline">Explore {active.category}</Link>
             <div className="flex gap-2">
               <button type="button" aria-label="Previous project" onClick={() => move(-1)} className="rounded-lg border p-2"><ArrowLeft size={19} /></button>
               <button type="button" aria-label="Next project" onClick={() => move(1)} className="rounded-lg border p-2"><ArrowRight size={19} /></button>

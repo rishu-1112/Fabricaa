@@ -64,10 +64,10 @@ export default function Contact() {
         <p className="mb-9 mt-3 text-gray-600">Ask about swatches, availability, or sourcing for your next project.</p>
         <div className="grid items-start gap-8 md:grid-cols-[1fr_1.4fr]">
           <aside className="space-y-4">
-            <div className="rounded-xl bg-indigo-50 p-5">
+            <div className="rounded-xl bg-emerald-50 p-5">
               <h2 className="font-semibold">Request pricing for multiple fabrics</h2>
               <p className="my-2 text-sm text-gray-700">Add your fabrics to a cart so your quote includes the right items and quantities.</p>
-              <Link className="text-sm font-semibold text-indigo-700 underline" to="/products">Browse the catalog</Link>
+              <Link className="text-sm font-semibold text-emerald-700 underline" to="/products">Browse the catalog</Link>
             </div>
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <h2 className="font-semibold">Example of a swatch inquiry</h2>
@@ -90,7 +90,7 @@ export default function Contact() {
               <label htmlFor="contact-message" className="block text-sm font-medium">Message</label>
               <textarea id="contact-message" className={field} name="message" key={fabric} defaultValue={fabric ? `Could you share swatch options for ${fabric}?` : ""} maxLength={1900} rows={5} required />
             </div>
-            <button disabled={sending} className="rounded-lg bg-indigo-700 px-5 py-2.5 font-semibold text-white disabled:opacity-50">{sending ? "Sending…" : "Send Message"}</button>
+            <button disabled={sending} className="rounded-lg bg-emerald-700 px-5 py-2.5 font-semibold text-white disabled:opacity-50">{sending ? "Sending…" : "Send Message"}</button>
             {feedback && <p role={feedback.error ? "alert" : "status"} className={feedback.error ? "text-red-700" : "text-green-800"}>{feedback.text}</p>}
           </form>
         </div>

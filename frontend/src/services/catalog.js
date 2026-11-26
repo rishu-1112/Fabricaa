@@ -20,3 +20,13 @@ export function availableQuantity(product) {
   const { inStock, stockCount } = product;
   return inStock !== false && Number.isSafeInteger(stockCount) ? Math.max(0, stockCount) : 0;
 }
+
+export function matchesFabricSearch(product, query) {
+  const searchable = [
+    product.name, product.material, product.category, product.description,
+    product.gsm && `${product.gsm} GSM`, product.width && `${product.width} cm`,
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  return query.toLowerCase().split(/\s+/).filter(Boolean)
+    .every((term) => searchable.includes(term));
+}
