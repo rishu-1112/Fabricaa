@@ -1,90 +1,51 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { ShoppingBag, Star } from "lucide-react";
+import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { availableQuantity, itemPrice } from "../services/catalog";
+import FabricImage from "./FabricImage";
 
-const ProductCard = ({ product, onAddToCart }) => {
-  const discount =
-    product.discountPrice &&
-    Math.round(((product.price - product.discountPrice) / product.price) * 100);
+export default function ProductCard({ product }) {
+  const { cart, saved, toggleSaved, addToCart } = useCart();
+  const selected = saved.some((item) => item._id === product._id);
+  const quantity = cart.find((item) => item._id === product._id)?.quantity || 0;
+  const stock = availableQuantity(product);
+  const price = itemPrice(product);
+  const url = `/products/${product._id}`;
 
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
-    >
-      <Link to={`/products/${product._id}`} className="block">
-        <div className="relative">
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-64 object-cover transition-transform duration-500 hover:scale-105"
-          />
-          {product.isNew && (
-            <span className="absolute top-3 left-3 bg-indigo-600 text-white text-xs px-2 py-1 rounded-full">
-              New
-            </span>
-          )}
-          {discount > 0 && (
-            <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              -{discount}%
-            </span>
-          )}
-        </div>
-      </Link>
-
-      {/* Product Info */}
-      <div className="p-5 text-left">
-        <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
-          {product.name}
-        </h3>
-        <p className="text-gray-500 text-sm line-clamp-1">{product.material}</p>
-
-        {/* Price Section */}
-        <div className="flex items-center gap-2 mt-2">
-          <p className="text-indigo-600 font-semibold">
-            ₹{product.discountPrice?.toLocaleString() || product.price.toLocaleString()}
-          </p>
-          {product.discountPrice && (
-            <p className="text-gray-400 line-through text-sm">
-              ₹{product.price.toLocaleString()}
-            </p>
-          )}
-        </div>
-
-        {/* Rating Section */}
-        <div className="flex items-center gap-1 mt-1 text-yellow-500">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              size={14}
-              fill={i < Math.round(product.rating) ? "#facc15" : "none"}
-              stroke="#facc15"
-            />
-          ))}
-          <span className="text-xs text-gray-500 ml-1">
-            ({product.numReviews})
-          </span>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={() => onAddToCart?.(product)}
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-all duration-300"
-          >
-            <ShoppingBag className="w-4 h-4" /> Add to Cart
-          </button>
-          <Link
-            to={`/products/${product._id}`}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition flex items-center justify-center"
-          >
-            View
-          </Link>
-        </div>
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:shadow-md">
+      <div className="relative">
+        <Link to={url} aria-label={`View ${product.name}`} className="block">
+          <FabricImage src={product.imageUrl} category={product.category} alt="" loading="lazy" className="h-52 w-full object-cover" />
+        </Link>
+        <button
+          type="button" aria-pressed={selected} aria-label={`Save ${product.name}`}
+          onClick={() => toggleSaved(product)}
+          className="absolute right-3 top-3 rounded-full bg-white p-2.5 text-indigo-700 shadow"
+        >
+          <Heart size={19} fill={selected ? "currentColor" : "none"} />
+        </button>
       </div>
-    </motion.div>
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{product.category}{product.sample ? " · Sample" : ""}</p>
+          <h3 className="mt-1 text-lg font-semibold"><Link to={url} className="hover:text-indigo-700">{product.name}</Link></h3>
+          <p className="text-sm text-gray-600">{product.material}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-semibold text-indigo-700">₹{price.toLocaleString("en-IN")}</span>
+          {price < product.price && <del className="text-sm text-gray-500">₹{product.price.toLocaleString("en-IN")}</del>}
+          {product.numReviews > 0 && (
+            <span className="ml-auto flex items-center gap-1 text-xs text-gray-700"><Star size={14} className="text-amber-500" /> {product.rating} ({product.numReviews})</span>
+          )}
+        </div>
+        <button
+          type="button" disabled={quantity >= stock} onClick={() => addToCart(product)}
+          className="mt-auto flex items-center justify-center gap-2 rounded-lg bg-indigo-700 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-800 disabled:bg-gray-100 disabled:text-gray-600"
+        >
+          <ShoppingBag size={16} /> {stock === 0 ? "Out of stock" : quantity ? `Add another · ${quantity} in cart` : "Add to cart"}
+        </button>
+      </div>
+    </article>
   );
-};
-
-export default ProductCard;
+}

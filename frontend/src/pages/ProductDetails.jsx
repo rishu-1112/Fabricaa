@@ -1,160 +1,121 @@
-import { apiUrl } from "../services/api";
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { motion } from "framer-motion";
-import { ArrowLeft, ShoppingBag, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Heart, ShoppingBag } from "lucide-react";
+import FabricImage from "../components/FabricImage";
+import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
-
+import { sampleProducts } from "../data/sampleCatalog";
+import { apiUrl } from "../services/api";
+import { availableQuantity, isDemoMode, itemPrice } from "../services/catalog";
 
 export default function ProductDetails() {
-  const { addToCart } = useCart();
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
-  const [mainImage, setMainImage] = useState("");
-  const [loading, setLoading] = useState(true);
+  return <ProductView key={id} id={id} />;
+}
+
+function ProductView({ id }) {
+  const sampleProduct = sampleProducts.find((item) => item._id === id);
+  const [product, setProduct] = useState(sampleProduct);
+  const [status, setStatus] = useState(sampleProduct ? "ready" : "loading");
+  const [imageIndex, setImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [attempt, setAttempt] = useState(0);
+  const { cart, saved, addToCart, toggleSaved } = useCart();
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    if (sampleProduct) return;
+    const controller = new AbortController();
+    async function loadProduct() {
       try {
-        const res = await axios.get(apiUrl(`/products/${id}`));
-        setProduct(res.data);
-        setMainImage(res.data.imageUrl);
-      } catch (error) {
-        console.error("Error fetching product details:", error);
-      } finally {
-        setLoading(false);
+        const response = await fetch(apiUrl(`/products/${encodeURIComponent(id)}`), { signal: controller.signal });
+        if (!response.ok) {
+          setStatus(response.status === 404 ? "missing" : "unavailable");
+          return;
+        }
+        setProduct(await response.json());
+        setStatus("ready");
+      } catch {
+        if (!controller.signal.aborted) setStatus("unavailable");
       }
-    };
-    fetchProduct();
-  }, [id]);
+    }
+    if (/^[a-f\d]{24}$/i.test(id)) loadProduct();
+    else setStatus("missing");
+    return () => controller.abort();
+  }, [id, sampleProduct, attempt]);
 
-  if (loading) {
+  if (status !== "ready") {
+    const messages = { loading: "Loading fabric…", missing: "Fabric not found.", unavailable: "The fabric catalog is temporarily unavailable." };
     return (
-      <div className="flex justify-center items-center h-[70vh] text-gray-500">
-        Loading product details...
-      </div>
+      <section className="space-y-4 px-6 py-20 text-center">
+        <p role="status">{messages[status]}</p>
+        {status === "unavailable" && <button className="mr-5 text-indigo-700 underline" onClick={() => { setStatus("loading"); setAttempt(attempt + 1); }}>Try again</button>}
+        <Link to="/products" className="text-indigo-700 underline">Browse fabrics</Link>
+      </section>
     );
   }
 
-  if (!product) {
-    return (
-      <div className="text-center py-20 text-gray-500">
-        Product not found.
-      </div>
-    );
-  }
+  const sampleFilter = product.sample && !isDemoMode ? "sample=1&" : "";
+  const images = [...new Set([product.imageUrl, ...(product.gallery || [])])];
+  const inCart = cart.find((item) => item._id === id)?.quantity || 0;
+  const stock = availableQuantity(product);
+  const remaining = Math.max(0, stock - inCart);
+  const selectedQuantity = Math.min(quantity, remaining || 1);
+  const isSaved = saved.some((item) => item._id === id);
+  const price = itemPrice(product);
+  const related = product.sample ? sampleProducts.filter((item) => item.category === product.category && item._id !== id) : [];
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="py-20 bg-gray-50 min-h-screen"
-    >
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Back button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 mb-8"
-        >
-          <ArrowLeft size={20} /> Back to Products
-        </button>
-
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Left - Image Section */}
-          <div className="space-y-4">
-            <motion.img
-              key={mainImage}
-              src={mainImage}
-              alt={product.name}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
-              className="w-full h-[450px] object-cover rounded-xl shadow-md"
-            />
-            {/* Thumbnail gallery */}
-            <div className="flex gap-4 justify-center">
-              {[product.imageUrl, ...(product.gallery || [])].map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt={`gallery-${i}`}
-                  onClick={() => setMainImage(img)}
-                  className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 ${
-                    mainImage === img ? "border-indigo-600" : "border-transparent"
-                  } hover:border-indigo-300 transition`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Right - Details Section */}
-          <div className="flex flex-col justify-center text-left">
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">
-              {product.name}
-            </h1>
-            <p className="text-gray-500 mb-3">{product.material}</p>
-
-            {/* Rating */}
-            <div className="flex items-center gap-1 mb-4 text-yellow-500">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                  key={i}
-                  size={16}
-                  fill={i < Math.round(product.rating) ? "#facc15" : "none"}
-                  stroke="#facc15"
-                />
-              ))}
-              <span className="text-sm text-gray-500 ml-1">
-                ({product.numReviews} Reviews)
-              </span>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-3xl font-bold text-indigo-600">
-                ₹{product.discountPrice?.toLocaleString() || product.price.toLocaleString()}
-              </span>
-              {product.discountPrice && (
-                <span className="text-gray-400 line-through text-lg">
-                  ₹{product.price.toLocaleString()}
-                </span>
-              )}
-            </div>
-
-            {/* Description */}
-            <p className="text-gray-700 leading-relaxed mb-6">
-              {product.description}
-            </p>
-
-            {/* Stock Info */}
-            <p
-              className={`mb-6 font-medium ${
-                product.stockCount > 0 ? "text-green-600" : "text-red-500"
-              }`}
-            >
-              {product.stockCount > 0
-                ? `In Stock (${product.stockCount} available)`
-                : "Out of Stock"}
-            </p>
-
-            {/* Add to Cart Button */}
-            <button
-              onClick={() => addToCart(product)}
-              disabled={product.stockCount === 0}
-              className={`flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                product.stockCount > 0
-                  ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                  : "bg-gray-400 text-gray-100 cursor-not-allowed"
-              }`}
-            >
-              <ShoppingBag size={18} />
-              {product.stockCount > 0 ? "Add to Cart" : "Out of Stock"}
+    <section className="mx-auto max-w-6xl px-6 py-12">
+      <Link to={sampleFilter ? "/products?sample=1" : "/products"} className="mb-7 inline-flex items-center gap-2 text-indigo-700 hover:underline"><ArrowLeft size={18} /> Browse fabrics</Link>
+      <div className="grid gap-10 md:grid-cols-2">
+        <div>
+          <FabricImage src={images[imageIndex]} category={product.category} alt={product.name} className="aspect-square w-full rounded-2xl object-cover" />
+          {images.length > 1 && <div className="mt-4 flex flex-wrap gap-3">
+            {images.map((image, index) => (
+              <button key={image} type="button" aria-label={`View image ${index + 1}`} aria-pressed={index === imageIndex} onClick={() => setImageIndex(index)} className={`overflow-hidden rounded-lg border-2 ${index === imageIndex ? "border-indigo-700" : "border-transparent"}`}>
+                <FabricImage src={image} category={product.category} alt="" className="h-16 w-16 object-cover" />
+              </button>
+            ))}
+          </div>}
+        </div>
+        <div className="space-y-5">
+          <p className="text-sm font-semibold text-indigo-700">{product.category}{product.sample ? " · Sample fabric" : ""}</p>
+          <h1 className="text-4xl font-bold">{product.name}</h1>
+          <p className="text-gray-600">{product.description}</p>
+          <p className="flex items-baseline gap-3 font-semibold">
+            <span className="text-2xl text-indigo-700">₹{price.toLocaleString("en-IN")}</span>
+            {price < product.price && <del className="text-gray-500">₹{product.price.toLocaleString("en-IN")}</del>}
+            {product.sample && <span className="text-sm text-gray-600">illustrative price</span>}
+          </p>
+          <dl className="grid grid-cols-2 gap-3 rounded-xl border border-gray-200 bg-white p-4 text-sm">
+            <dt>Composition</dt><dd className="font-semibold">{product.material}</dd>
+            {product.gsm && <><dt>Weight</dt><dd className="font-semibold">{product.gsm} GSM</dd></>}
+            {product.width && <><dt>Width</dt><dd className="font-semibold">{product.width} cm</dd></>}
+            <dt>Availability</dt><dd className="font-semibold">{stock > 0 ? `${stock} available` : "Out of stock"}</dd>
+          </dl>
+          <div className="flex flex-wrap items-end gap-3">
+            {remaining > 0 && <label className="flex flex-col gap-1 text-sm font-medium">
+              Quantity
+              <select className="rounded-lg border border-gray-300 bg-white p-2.5" value={selectedQuantity} onChange={(event) => setQuantity(Number(event.target.value))}>
+                {Array.from({ length: Math.min(remaining, 50) }, (_, index) => <option key={index + 1}>{index + 1}</option>)}
+              </select>
+            </label>}
+            <button type="button" disabled={!remaining} onClick={() => addToCart(product, selectedQuantity)} className="flex items-center gap-2 rounded-lg bg-indigo-700 px-4 py-2.5 font-semibold text-white disabled:bg-gray-200 disabled:text-gray-600">
+              <ShoppingBag size={18} /> {remaining ? "Add to cart" : stock ? "Stock limit reached" : "Out of stock"}
             </button>
+            <button type="button" aria-pressed={isSaved} onClick={() => toggleSaved(product)} className="flex items-center gap-2 rounded-lg border border-indigo-200 px-4 py-2.5 text-indigo-700"><Heart size={18} fill={isSaved ? "currentColor" : "none"} /> {isSaved ? "Saved" : "Save"}</button>
+          </div>
+          {inCart > 0 && <p role="status"><Link to="/cart" className="text-sm font-semibold text-indigo-700 underline">{inCart} in your cart</Link></p>}
+          <div className="flex flex-wrap gap-4 text-sm text-indigo-700">
+            <Link to={`/products?${sampleFilter}category=${encodeURIComponent(product.category)}`} className="underline">More {product.category} fabrics</Link>
+            {!product.sample && <Link to={`/contact?topic=swatches&fabric=${encodeURIComponent(product.name)}`} className="underline">Ask for a swatch</Link>}
           </div>
         </div>
       </div>
-    </motion.section>
+      {related.length > 0 && <section className="mt-14">
+        <h2 className="mb-5 text-2xl font-bold">Related Fabrics</h2>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{related.map((item) => <ProductCard key={item._id} product={item} />)}</div>
+      </section>}
+    </section>
   );
 }

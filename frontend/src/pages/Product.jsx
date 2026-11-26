@@ -1,152 +1,81 @@
-import { apiUrl } from "../services/api";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { Link, useSearchParams } from "react-router-dom";
+import { Search } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
 import FiltersBar from "../components/FiltersBar";
-import ScrollReveal from "../components/ScrollRevealProduct";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search } from "lucide-react";
+import { availableQuantity, isDemoMode, itemPrice } from "../services/catalog";
+import useCatalog from "../services/useCatalog";
+import { fabricCategories } from "../data/sampleCatalog";
 
 export default function Products() {
-  const [products, setProducts] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sort, setSort] = useState("new");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  const { addToCart } = useCart();
-
-  // Fetch products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get(apiUrl("/products"));
-        setProducts(res.data);
-        setFiltered(res.data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
-
-  // Filter + Sort + Search
-  useEffect(() => {
-    let temp = [...products];
-
-    // Category filter
-    if (selectedCategory !== "All") {
-      temp = temp.filter((p) => p.category === selectedCategory);
-    }
-
-    // Search filter
-    if (searchQuery.trim() !== "") {
-      const q = searchQuery.toLowerCase();
-      temp = temp.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.material.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q)
-      );
-    }
-
-    // Sorting
-    if (sort === "low") temp.sort((a, b) => a.price - b.price);
-    if (sort === "high") temp.sort((a, b) => b.price - a.price);
-    if (sort === "new")
-      temp.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-    setFiltered(temp);
-  }, [selectedCategory, sort, searchQuery, products]);
-
-  // Skeleton Card
-  const SkeletonCard = () => (
-    <div className="animate-pulse bg-white rounded-2xl shadow-sm p-5 h-96">
-      <div className="bg-gray-200 h-48 w-full rounded-lg mb-4"></div>
-      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-      <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-      <div className="h-8 bg-gray-200 rounded w-full"></div>
-    </div>
+  const { saved } = useCart();
+  const [params, setParams] = useSearchParams();
+  const { products, status, retry } = useCatalog(params.get("sample") === "1");
+  const resetUrl = status === "sample" && !isDemoMode ? "/products?sample=1" : "/products";
+  const category = params.get("category") || "All";
+  const sort = params.get("sort") || "new";
+  const query = params.get("q") || "";
+  const stock = params.get("stock") === "1";
+  const savedOnly = params.get("saved") === "1";
+  const source = savedOnly ? saved : products;
+  const categories = [...new Set([...fabricCategories.map(({ name }) => name), ...source.map((item) => item.category)])].filter(Boolean);
+  const search = query.trim().toLowerCase();
+  const visible = source.filter((product) =>
+    (category === "All" || product.category === category) &&
+    (!stock || availableQuantity(product) > 0) &&
+    [product.name, product.material, product.category, product.description].join(" ").toLowerCase().includes(search)
   );
+  if (sort === "low") visible.sort((a, b) => itemPrice(a) - itemPrice(b));
+  if (sort === "high") visible.sort((a, b) => itemPrice(b) - itemPrice(a));
+  if (sort === "name") visible.sort((a, b) => a.name.localeCompare(b.name));
+  if (sort === "new") visible.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+
+  function updateFilter(key, value) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: key === "q", preventScrollReset: true });
+  }
 
   return (
-    <section className="py-20 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Page Header */}
-        <ScrollReveal>
-          <h1 className="text-4xl font-bold text-center text-gray-800 mb-4">
-            Explore Our Premium Fabrics
-          </h1>
-          <p className="text-center text-gray-500 mb-10 max-w-2xl mx-auto">
-            Discover fabrics crafted for comfort, elegance, and quality.
-          </p>
-        </ScrollReveal>
-
-        {/* Search Bar */}
-        <div className="flex justify-center mb-10">
-          <div className="flex items-center border border-gray-300 rounded-full px-5 py-3 w-full sm:w-2/3 lg:w-1/2 bg-white shadow-sm">
-            <Search className="w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by name, material or category..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 outline-none px-3 text-gray-700 bg-transparent"
-            />
+    <section className="min-h-screen bg-gray-50 px-6 py-14">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="text-4xl font-bold">Fabric Catalog</h1>
+        <p className="mt-3 text-gray-600">Find fabrics by fibre, weight, and intended use.</p>
+        {status === "sample" && !savedOnly && (
+          <div className="mt-5 rounded-lg bg-indigo-50 px-4 py-3 text-sm text-indigo-900">
+            You’re viewing sample fabrics. Prices and availability are illustrative.
+            {!isDemoMode && <Link to="/products" className="ml-3 font-semibold underline">Back to live catalog</Link>}
           </div>
+        )}
+        <div className="my-7 space-y-5 rounded-2xl border border-gray-200 bg-white p-5">
+          <label className="flex items-center gap-3 rounded-lg border border-gray-300 px-4">
+            <Search size={19} aria-hidden="true" />
+            <input className="w-full bg-transparent py-3" type="search" aria-label="Search fabrics" placeholder="Search names, fibres or uses" value={query} onChange={(event) => updateFilter("q", event.target.value)} />
+          </label>
+          <FiltersBar categories={categories} category={category} sort={sort} inStock={stock} savedOnly={savedOnly} updateFilter={updateFilter} />
         </div>
-
-        {/* Filters */}
-        <div className="mb-12">
-          <FiltersBar
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            sort={sort}
-            setSort={setSort}
-          />
-        </div>
-
-        {/* Product Grid */}
-        {loading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {Array(8)
-              .fill()
-              .map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-          </div>
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {filtered.length > 0 ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                {filtered.map((product) => (
-                  <motion.div
-                    key={product._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  >
-                    <ProductCard product={product} onAddToCart={addToCart} />
-                  </motion.div>
-                ))}
+        {!savedOnly && status === "loading" ? <p role="status">Loading fabrics…</p> :
+          !savedOnly && (status === "empty" || status === "unavailable") ? (
+            <div className="space-y-4 rounded-xl bg-white p-8 text-center">
+              <p role="status">{status === "empty" ? "There are no live fabrics in the catalog yet." : "The live catalog is temporarily unavailable."}</p>
+              <div className="flex flex-wrap justify-center gap-4 text-indigo-700">
+                {status === "unavailable" && <button type="button" className="underline" onClick={retry}>Try again</button>}
+                <Link to="/products?sample=1" className="underline">Browse sample fabrics</Link>
               </div>
-            ) : (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center text-gray-500 mt-20"
-              >
-                No products match your search or filters.
-              </motion.p>
-            )}
-          </AnimatePresence>
+            </div>
+          ) : (
+          <>
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <p role="status" className="text-sm text-gray-600">{visible.length} {visible.length === 1 ? "fabric" : "fabrics"}</p>
+              {[...params.keys()].some((key) => key !== "sample") && <Link to={resetUrl} className="text-sm font-semibold text-indigo-700 hover:underline">Clear filters</Link>}
+            </div>
+            {visible.length ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {visible.map((product) => <ProductCard key={product._id} product={product} />)}
+              </div>
+            ) : <p className="rounded-xl bg-white p-8 text-center text-gray-600">{savedOnly && !saved.length ? "Use the heart on any fabric to save it here." : "No fabrics match your filters."}</p>}
+          </>
         )}
       </div>
     </section>

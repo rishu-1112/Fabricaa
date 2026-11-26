@@ -24,9 +24,7 @@ const Hero = () => {
         <p className="max-w-2xl mx-auto text-lg mb-6">
           Discover a world of premium fabrics, colors, and textures curated for modern fashion and design.
         </p>
-        <button className="bg-blue-700 hover:bg-blue-800 px-8 py-3 rounded-full text-white font-medium transition">
-          <Link to="/products">Explore Fabrics</Link>
-        </button>
+        <Link to="/products" className="inline-block rounded-full bg-blue-700 px-8 py-3 font-medium text-white transition hover:bg-blue-800">Explore Fabrics</Link>
       </div>
     </section>
   );

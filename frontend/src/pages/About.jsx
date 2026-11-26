@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import storyImage from "../assets/gallery1.jpg";
+import processVideo from "../assets/processFibre.mp4";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
@@ -17,28 +20,13 @@ const fadeUp = {
 };
 
 export default function About() {
-  const [showVideo, setShowVideo] = useState(false);
-
-  const partners = [
-    { name: "Arvind", logo: "/partners/arvind.png" },
-    { name: "Raymond", logo: "/partners/raymond.png" },
-    { name: "Reliance", logo: "/partners/reliance.png" },
-    { name: "FabIndia", logo: "/partners/fabindia.png" },
-    { name: "Lifestyle", logo: "/partners/lifestyle.png" },
-  ];
+  const videoDialog = useRef(null);
+  const video = useRef(null);
 
   return (
     <section className="bg-white text-gray-800">
       {/* HERO */}
       <div className="relative overflow-hidden bg-gradient-to-r from-indigo-50 to-indigo-100 py-20">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute top-0 left-0 w-full h-full object-cover opacity-20"
-          src="https://cdn.pixabay.com/video/2025/03/04/262484_tiny.mp4"
-        />
         <div className="relative z-10 max-w-5xl mx-auto text-center px-6">
           <motion.h1
             initial="hidden"
@@ -73,19 +61,17 @@ export default function About() {
         className="max-w-6xl mx-auto py-16 px-6 grid md:grid-cols-2 gap-10 items-center"
       >
         <img
-          src="https://img.freepik.com/premium-photo/textile-dyeing-factory-equipment-production-dyed-fabrics_124507-51494.jpg?w=1380"
-          alt="Textile Factory"
+          src={storyImage}
+          alt="Textile textures"
           className="rounded-2xl shadow-lg"
         />
         <div>
           <h2 className="text-3xl font-semibold text-indigo-700 mb-4">Our Journey</h2>
           <p className="text-gray-600 mb-4">
-            Established in 1990, <strong>Fabricaa</strong> started as a small weaving unit with a dream —
-            to redefine the Indian textile industry through technology and creativity. Today, we export to
-            <strong> 35+ countries</strong>, serving top fashion brands.
+            Fabricaa is a textile showcase for comparing materials, collecting fabrics, and requesting quotes for design and sourcing projects.
           </p>
           <p className="text-gray-600">
-            From cotton to silk — every thread we produce carries our legacy of craftsmanship and sustainability.
+            Use sample fabric specifications to compare composition, weight, and width as you plan a collection.
           </p>
         </div>
       </motion.div>
@@ -129,7 +115,7 @@ export default function About() {
           variants={fadeUp}
           className="text-3xl font-semibold text-indigo-700 mb-6"
         >
-          Our State-of-the-Art Machinery
+          Inside the Textile Process
         </motion.h2>
         <motion.p
           initial="hidden"
@@ -138,39 +124,29 @@ export default function About() {
           variants={fadeUp}
           className="text-gray-600 max-w-2xl mx-auto mb-8"
         >
-          See how innovation meets craftsmanship inside our factory — automated weaving, eco-dyeing & AI-driven quality control.
+          Watch a sample textile production video for a closer look at fabric processing.
         </motion.p>
         <button
-          onClick={() => setShowVideo(true)}
+          onClick={() => videoDialog.current.showModal()}
           className="bg-indigo-600 text-white px-8 py-3 rounded-full hover:bg-indigo-700 transition"
         >
           Watch Process Video
         </button>
       </div>
 
-      {showVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="relative w-11/12 md:w-2/3">
-            <button
-              className="absolute top-2 right-4 text-white text-2xl"
-              onClick={() => setShowVideo(false)}
-            >
-              ✕
-            </button>
-            <video
-              src="https://videos.pexels.com/video-files/3736926/3736926-uhd_2560_1440_25fps.mp4"
-              controls
-              autoPlay
-              className="rounded-xl shadow-xl"
-            />
-          </div>
+      <dialog ref={videoDialog} aria-labelledby="process-title" onClose={() => video.current.pause()} className="w-[min(90vw,52rem)] rounded-xl p-4 backdrop:bg-black/75">
+        <div className="mb-3 flex justify-between gap-3">
+          <h2 id="process-title" className="font-semibold">Sample Process Video</h2>
+          <button type="button" className="text-indigo-700 underline" onClick={() => videoDialog.current.close()}>Close</button>
         </div>
-      )}
+        <video ref={video} src={processVideo} controls playsInline preload="none" className="max-h-[70vh] w-full rounded-lg" />
+      </dialog>
 
       {/* GROWTH CHART */}
       <div className="bg-gray-50 py-16">
         <div className="max-w-6xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-semibold text-indigo-700 mb-10">Our Growth Metrics</h2>
+          <h2 className="text-3xl font-semibold text-indigo-700 mb-10">Illustrative Textile Metrics</h2>
+          <p className="mb-5 text-sm text-gray-600">Example dashboard data.</p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={growthData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -183,27 +159,21 @@ export default function About() {
         </div>
       </div>
 
-      {/* PARTNERS */}
-      <div className="max-w-6xl mx-auto py-16 px-6 text-center">
-        <h2 className="text-3xl font-semibold text-indigo-700 mb-10">Our Trusted Partners</h2>
-        <div className="flex flex-wrap justify-center gap-10">
-          {partners.map((p, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ scale: 1.05 }}
-              className="bg-white border rounded-xl shadow p-6 w-40 hover:shadow-lg transition"
-            >
-              <img
-                src={p.logo}
-                alt={p.name}
-                className="mx-auto h-12 object-contain"
-                onError={(e) => (e.target.style.display = "none")}
-              />
-              <p className="mt-3 font-semibold text-gray-700">{p.name}</p>
-            </motion.div>
+      <section className="mx-auto max-w-6xl px-6 py-14">
+        <h2 className="mb-6 text-3xl font-semibold text-indigo-700">Who the Catalog Is For</h2>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            ["Design studios", "Compare drape and weight for upcoming collections."],
+            ["Small-batch makers", "Organize shortlist quantities before requesting a quote."],
+            ["Sourcing teams", "Send a consolidated inquiry for multiple fabric types."],
+          ].map(([audience, description]) => (
+            <article key={audience} className="rounded-xl border border-gray-200 p-5">
+              <h3 className="font-semibold">{audience}</h3>
+              <p className="mt-2 text-sm text-gray-600">{description}</p>
+            </article>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* CTA */}
       <div className="bg-indigo-600 py-16 text-center text-white">
@@ -219,9 +189,7 @@ export default function About() {
         <p className="max-w-2xl mx-auto mb-8 text-indigo-100">
           Designers, suppliers, or distributors — become a part of our growing network and help us weave the future of textiles.
         </p>
-        <button className="bg-white text-indigo-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-200 transition">
-          Become a Partner
-        </button>
+        <Link to="/contact?topic=partnership" className="inline-block rounded-full bg-white px-8 py-3 font-semibold text-indigo-700 hover:bg-gray-200">Become a Partner</Link>
       </div>
     </section>
   );

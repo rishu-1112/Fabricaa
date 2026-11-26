@@ -1,66 +1,68 @@
 import express from "express";
+import mongoose from "mongoose";
 import requireAdmin from "../middleware/requireAdmin.js";
 import validateCatalogFields from "../middleware/validateCatalogFields.js";
 import Product from "../models/productModel.js";
 
 const router = express.Router();
-const validateFields = validateCatalogFields(["name", "description", "category", "material", "imageUrl", "gallery", "price", "discountPrice", "inStock", "stockCount", "isFeatured"]);
+const validateFields = validateCatalogFields([
+  "name", "description", "category", "material", "gsm", "width", "imageUrl",
+  "gallery", "price", "discountPrice", "inStock", "stockCount", "isFeatured",
+]);
 
-// GET all products
+router.param("id", (req, res, next, id) => {
+  if (!mongoose.isObjectIdOrHexString(id)) {
+    return res.status(400).json({ message: "Invalid product ID." });
+  }
+  next();
+});
+
 router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find().sort({ createdAt: -1 });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch products", error: err });
-  }
+  res.json(await Product.find().sort({ createdAt: -1 }));
 });
 
-// GET single product by ID
 router.get("/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching product", error: err });
-  }
+  const product = await Product.findById(req.params.id);
+  if (!product) return res.status(404).json({ message: "Product not found." });
+  res.json(product);
 });
 
-// POST - Create new product (Admin)
 router.post("/", requireAdmin, validateFields, async (req, res) => {
-  try {
-    const product = new Product(req.body);
-    const created = await product.save();
-    res.status(201).json(created);
-  } catch (err) {
-    res.status(400).json({ message: "Failed to create product", error: err });
-  }
+  const product = await Product.create(req.body);
+  res.status(201).json(product);
 });
 
-// PUT - Update product (Admin)
 router.put("/:id", requireAdmin, validateFields, async (req, res) => {
-  try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!updated) return res.status(404).json({ message: "Product not found" });
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ message: "Failed to update product", error: err });
+  const product = await Product.findById(req.params.id);
+  if (!product) return res.status(404).json({ message: "Product not found." });
+
+  product.set(req.body);
+  // A regular price edit also changes the validity of an existing discount.
+  if (product.isModified("price") && product.discountPrice != null) {
+    product.markModified("discountPrice");
   }
+  res.json(await product.save());
 });
 
-// DELETE - Remove product (Admin)
 router.delete("/:id", requireAdmin, async (req, res) => {
-  try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Product not found" });
-    res.json({ message: "Product deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting product", error: err });
+  const product = await Product.findByIdAndDelete(req.params.id);
+  if (!product) return res.status(404).json({ message: "Product not found." });
+  res.json({ message: "Product deleted successfully." });
+});
+
+router.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+  if (error instanceof mongoose.Error.ValidationError) {
+    return res.status(400).json({
+      message: "Invalid product data.",
+      fields: Object.keys(error.errors),
+    });
   }
+  if (error instanceof mongoose.Error.VersionError) {
+    return res.status(409).json({ message: "The product changed. Reload it and try again." });
+  }
+  console.error("Catalog request failed:", error);
+  res.status(500).json({ message: "Could not process the catalog request." });
 });
 
 export default router;

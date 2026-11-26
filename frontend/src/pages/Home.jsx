@@ -5,6 +5,7 @@ import WhyUs from "../components/WhyUs";
 import Showcase from "../components/Showcase";
 import Process from "../components/Process";
 import Gallery from "../components/Gallery";
+import FabricFaq from "../components/FabricFaq";
 import ContactBanner from "../components/ContactBanner";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
       <Showcase />
       <Process />
       <Gallery />
+      <FabricFaq />
       <ContactBanner />
     </div>
   );

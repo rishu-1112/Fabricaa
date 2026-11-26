@@ -1,0 +1,9 @@
+{
+  "name": "fabricaa",
+  "private": true,
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "dev": "npm ci --prefix frontend --no-audit --no-fund && npm --prefix frontend run dev -- --mode demo",
+    "dev:live": "npm --prefix frontend run dev --"
+  }
+}

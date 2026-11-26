@@ -1,46 +1,38 @@
-import React from "react";
-
-const FiltersBar = ({ selectedCategory, setSelectedCategory, sort, setSort }) => {
-  const categories = ["All", "Cotton", "Silk", "Wool", "Synthetic", "Other"];
-  const sortOptions = [
-    { label: "Newest", value: "new" },
-    { label: "Price: Low to High", value: "low" },
-    { label: "Price: High to Low", value: "high" },
-  ];
-
+export default function FiltersBar({ categories, category, sort, inStock, savedOnly, updateFilter }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
-      {/* Category Filter */}
-      <div className="flex flex-wrap gap-3">
-        {categories.map((cat) => (
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap gap-2" aria-label="Fabric categories" role="group">
+        {["All", ...categories].map((name) => (
           <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-full border text-sm font-medium transition-all duration-300 ${
-              selectedCategory === cat
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-indigo-50"
-            }`}
+            key={name}
+            type="button"
+            aria-pressed={category === name}
+            onClick={() => updateFilter("category", name === "All" ? "" : name)}
+            className={`rounded-full border px-4 py-2 text-sm font-medium ${category === name ? "border-indigo-700 bg-indigo-700 text-white" : "border-gray-200 bg-white hover:bg-indigo-50"}`}
           >
-            {cat}
+            {name}
           </button>
         ))}
       </div>
-
-      {/* Sorting */}
-      <select
-        value={sort}
-        onChange={(e) => setSort(e.target.value)}
-        className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:ring-2 focus:ring-indigo-500"
-      >
-        {sortOptions.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={inStock} onChange={(event) => updateFilter("stock", event.target.checked ? "1" : "")} />
+          In stock
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={savedOnly} onChange={(event) => updateFilter("saved", event.target.checked ? "1" : "")} />
+          Saved only
+        </label>
+        <label className="flex items-center gap-2">
+          Sort by
+          <select value={sort} onChange={(event) => updateFilter("sort", event.target.value === "new" ? "" : event.target.value)} className="rounded-lg border border-gray-200 bg-white p-2">
+            <option value="new">Newest</option>
+            <option value="low">Price · low to high</option>
+            <option value="high">Price · high to low</option>
+            <option value="name">Name · A to Z</option>
+          </select>
+        </label>
+      </div>
     </div>
   );
-};
-
-export default FiltersBar;
+}

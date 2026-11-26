@@ -1,14 +1,11 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
-const ContactBanner = () => (
-  <section className="bg-blue-700 py-20 text-center text-white">
-    <h2 className="text-3xl font-bold mb-4">Let’s Talk About Your Fabric Needs</h2>
-    <p className="mb-6 text-lg">Reach out to us to collaborate or request custom fabric samples.</p>
-    <button className="bg-white text-blue-700 font-semibold px-6 py-3 rounded-full hover:bg-gray-100 transition">
-      <Link to="/contact">Contact Us</Link>
-    </button>
-  </section>
-);
-
-export default ContactBanner;
+export default function ContactBanner() {
+  return (
+    <section className="bg-indigo-700 px-6 py-14 text-center text-white">
+      <h2 className="mb-4 text-3xl font-bold">Planning a Fabric Project?</h2>
+      <p className="mb-6">Ask about swatches, bulk quantities, or a sourcing partnership.</p>
+      <Link to="/contact?topic=swatches" className="inline-block rounded-full bg-white px-6 py-3 font-semibold text-indigo-700 hover:bg-indigo-50">Ask About Swatches</Link>
+    </section>
+  );
+}

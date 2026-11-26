@@ -1,4 +1,5 @@
-import React from "react";
+import FabricImage from "../components/FabricImage";
+import { availableQuantity, itemPrice } from "../services/catalog";
 import { useCart } from "../context/CartContext";
 import { Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -20,7 +21,7 @@ export default function Cart() {
   return (
     <section className="py-20 bg-gray-50 min-h-screen">
       <div className="max-w-5xl mx-auto px-6">
-        <h1 className="text-3xl font-bold mb-8">Your Shopping Cart</h1>
+        <h1 className="text-3xl font-bold mb-8">Your Fabric Cart</h1>
 
         <div className="space-y-6">
           {cart.map((item) => (
@@ -28,17 +29,18 @@ export default function Cart() {
               key={item._id}
               className="flex flex-col sm:flex-row items-center gap-6 bg-white rounded-2xl shadow-md p-4"
             >
-              <img
+              <FabricImage
+                category={item.category}
                 src={item.imageUrl}
                 alt={item.name}
                 className="w-32 h-32 object-cover rounded-lg"
               />
               <div className="flex-1 text-left">
-                <h3 className="text-lg font-semibold text-gray-800">{item.name}</h3>
-                <p className="text-gray-500">{item.material}</p>
+                <h3 className="text-lg font-semibold text-gray-800"><Link className="hover:underline" to={`/products/${item._id}`}>{item.name}</Link></h3>
+                <p className="text-gray-500">{item.material}{item.sample ? " · Sample fabric" : ""}</p>
                 <p className="text-indigo-600 font-semibold mt-2">
                   ₹
-                  {(item.discountPrice || item.price).toLocaleString()}
+                  {itemPrice(item).toLocaleString("en-IN")}
                 </p>
               </div>
 
@@ -46,14 +48,17 @@ export default function Cart() {
                 <button
                   onClick={() => updateQuantity(item._id, item.quantity - 1)}
                   disabled={item.quantity <= 1}
-                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  aria-label={`Decrease quantity of ${item.name}`}
+                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
                 >
                   -
                 </button>
                 <span className="px-2">{item.quantity}</span>
                 <button
                   onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  disabled={item.quantity >= availableQuantity(item)}
+                  aria-label={`Increase quantity of ${item.name}`}
+                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
                 >
                   +
                 </button>
@@ -61,6 +66,7 @@ export default function Cart() {
 
               <button
                 onClick={() => removeFromCart(item._id)}
+                aria-label={`Remove ${item.name}`}
                 className="text-red-500 hover:text-red-600 transition"
               >
                 <Trash2 size={20} />
@@ -72,7 +78,7 @@ export default function Cart() {
         {/* Total + Clear */}
         <div className="mt-10 flex flex-col sm:flex-row justify-between items-center border-t pt-6">
           <h3 className="text-lg font-medium text-gray-800">
-            Total ({totalItems} items):{" "}
+            Estimated total ({totalItems} items):{" "}
             <span className="text-indigo-600 font-semibold">
               ₹{totalPrice.toLocaleString()}
             </span>
@@ -84,10 +90,8 @@ export default function Cart() {
             >
               Clear Cart
             </button>
-            <Link to="/checkout">
-              <button className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
-                Request a Quote
-              </button>
+            <Link to="/checkout" className="px-6 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
+              {cart.some((item) => item.sample) ? "Preview Sample Quote" : "Request a Quote"}
             </Link>
           </div>
         </div>

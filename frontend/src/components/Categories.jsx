@@ -1,33 +1,23 @@
-import React from "react";
-import cotton from "../assets/cotton.jpg";
-import silk from "../assets/silk.jpg";
-import denim from "../assets/denim.jpg";
+import { Link } from "react-router-dom";
+import { fabricCategories } from "../data/sampleCatalog";
 
-const Categories = () => {
-  const fabrics = [
-    { name: "Cotton", img: cotton },
-    { name: "Silk", img: silk },
-    { name: "Denim", img: denim },
-  ];
-
+export default function Categories() {
   return (
-    <section className="py-20 bg-white">
-      <h2 className="text-3xl font-bold text-center mb-10">Our Fabric Range</h2>
-      <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 px-6">
-        {fabrics.map((fab, index) => (
-          <div
-            key={index}
-            className="rounded-2xl overflow-hidden shadow-lg hover:scale-105 transition"
-          >
-            <img src={fab.img} alt={fab.name} className="w-full h-64 object-cover" />
-            <div className="p-4 text-center">
-              <h3 className="text-xl font-semibold">{fab.name}</h3>
-            </div>
-          </div>
-        ))}
+    <section className="bg-white px-6 py-16">
+      <div className="mx-auto max-w-6xl">
+        <h2 className="mb-8 text-3xl font-bold">Shop by Fabric</h2>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {fabricCategories.filter(({ name }) => name !== "Other").map(({ name, image, use }) => (
+            <Link key={name} to={`/products?category=${name}`} className="group overflow-hidden rounded-2xl border border-gray-200">
+              <img src={image} alt="" loading="lazy" className="h-44 w-full object-cover transition group-hover:scale-105" />
+              <div className="relative bg-white p-5">
+                <h3 className="text-lg font-semibold">{name}</h3>
+                <p className="text-sm text-gray-600">{use}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
-};
-
-export default Categories;
+}

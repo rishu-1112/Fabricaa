@@ -14,12 +14,20 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["Cotton", "Silk", "Wool", "Synthetic", "Linen", "Other"],
+      enum: ["Cotton", "Silk", "Wool", "Synthetic", "Denim", "Linen", "Other"],
       default: "Other",
     },
     material: {
       type: String,
       required: true,
+    },
+    gsm: {
+      type: Number,
+      min: 1,
+    },
+    width: {
+      type: Number,
+      min: 1,
     },
     imageUrl: {
       type: String,
@@ -33,9 +41,18 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required: true,
+      min: 0,
+      validate: Number.isFinite,
     },
     discountPrice: {
       type: Number,
+      min: 0,
+      validate: {
+        validator(value) {
+          return value == null || (Number.isFinite(value) && value <= this.price);
+        },
+        message: "Discount price must be at most the regular price.",
+      },
     },
     inStock: {
       type: Boolean,
@@ -44,6 +61,8 @@ const productSchema = new mongoose.Schema(
     stockCount: {
       type: Number,
       default: 0,
+      min: 0,
+      validate: { validator: Number.isSafeInteger, message: "Stock count must be a whole number." },
     },
     isFeatured: {
       type: Boolean,
@@ -62,7 +81,7 @@ const productSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true, optimisticConcurrency: true }
 );
 
 const Product = mongoose.model("Product", productSchema);
