@@ -1,0 +1,11 @@
+{
+  "buildCommand": "if [ -n \"$VITE_API_BASE_URL\" ]; then npm run build; else npm run build -- --mode demo; fi",
+  "rewrites": [
+    { "source": "/products", "destination": "/index.html" },
+    { "source": "/products/:id", "destination": "/index.html" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/contact", "destination": "/index.html" },
+    { "source": "/cart", "destination": "/index.html" },
+    { "source": "/checkout", "destination": "/index.html" }
+  ]
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { apiUrl } from "../services/api";
+import { isDemoMode } from "../services/catalog";
 import FabricFaq from "../components/FabricFaq";
 
 const topics = {
@@ -74,7 +75,12 @@ export default function Contact() {
               <p className="mt-2 text-sm text-gray-600">“I’m comparing cotton poplin and linen for summer shirts. Could you share swatch options and minimum quantities?”</p>
             </div>
           </aside>
-          <form onSubmit={submit} className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6">
+          {isDemoMode ? (
+            <section className="rounded-2xl border border-stone-200 bg-white p-6">
+              <h2 className="text-xl font-semibold">Contact form unavailable in demo</h2>
+              <p className="mt-2 text-gray-600">You can browse the sample catalog and download a draft quote from your cart.</p>
+            </section>
+          ) : <form onSubmit={submit} className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6">
             <h2 className="text-xl font-semibold">Send a Message</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block text-sm font-medium">Name<input className={field} name="name" autoComplete="name" maxLength={100} required /></label>
@@ -92,7 +98,7 @@ export default function Contact() {
             </div>
             <button disabled={sending} className="rounded-lg bg-emerald-700 px-5 py-2.5 font-semibold text-white disabled:opacity-50">{sending ? "Sending…" : "Send Message"}</button>
             {feedback && <p role={feedback.error ? "alert" : "status"} className={feedback.error ? "text-red-700" : "text-green-800"}>{feedback.text}</p>}
-          </form>
+          </form>}
         </div>
       </div>
       <FabricFaq />
