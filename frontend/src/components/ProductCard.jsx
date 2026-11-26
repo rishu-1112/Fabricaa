@@ -1,14 +1,16 @@
 import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { availableQuantity, itemPrice } from "../services/catalog";
+import { availableQuantity, formatFabricQuantity, itemPrice, minimumQuantity } from "../services/catalog";
 import FabricImage from "./FabricImage";
 
 export default function ProductCard({ product }) {
-  const { cart, saved, toggleSaved, addToCart } = useCart();
+  const { cart, saved, comparison, toggleSaved, toggleComparison, addToCart } = useCart();
   const selected = saved.some((item) => item._id === product._id);
   const quantity = cart.find((item) => item._id === product._id)?.quantity || 0;
   const stock = availableQuantity(product);
+  const minimum = minimumQuantity(product);
+  const compared = comparison.some((item) => item._id === product._id);
   const price = itemPrice(product);
   const url = `/products/${product._id}`;
 
@@ -31,24 +33,29 @@ export default function ProductCard({ product }) {
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{product.category}{product.sample ? " · Sample" : ""}</p>
           <h3 className="mt-1 text-lg font-semibold"><Link to={url} className="hover:text-emerald-700">{product.name}</Link></h3>
           <p className="text-sm text-gray-600">{product.material}</p>
-          {(product.gsm || product.width) && (
+          {(product.gsm || product.width || product.minimumOrderQuantity) && (
             <p className="mt-2 text-xs text-stone-600">
-              {[product.gsm && `${product.gsm} GSM`, product.width && `${product.width} cm wide`].filter(Boolean).join(" · ")}
+              {[product.gsm && `${product.gsm} GSM`, product.width && `${product.width} cm wide`, product.minimumOrderQuantity && `Min. ${formatFabricQuantity(product.minimumOrderQuantity, product.priceUnit)}`].filter(Boolean).join(" · ")}
             </p>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold text-emerald-700">₹{price.toLocaleString("en-IN")}</span>
+          <span className="font-semibold text-emerald-700">₹{price.toLocaleString("en-IN")}{product.priceUnit && <span className="text-sm font-normal text-stone-600"> / {product.priceUnit}</span>}</span>
           {price < product.price && <del className="text-sm text-gray-500">₹{product.price.toLocaleString("en-IN")}</del>}
           {product.numReviews > 0 && (
             <span className="ml-auto flex items-center gap-1 text-xs text-gray-700"><Star size={14} className="text-amber-500" /> {product.rating} ({product.numReviews})</span>
           )}
         </div>
         <button
-          type="button" disabled={quantity >= stock} onClick={() => addToCart(product)}
+          type="button" disabled={stock < minimum || quantity >= stock} onClick={() => addToCart(product)}
           className="mt-auto flex items-center justify-center gap-2 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:bg-gray-100 disabled:text-gray-600"
         >
-          <ShoppingBag size={16} /> {stock === 0 ? "Out of stock" : quantity >= stock ? `Stock limit · ${quantity} in cart` : quantity ? `Add another · ${quantity} in cart` : "Add to cart"}
+          <ShoppingBag size={16} /> {stock === 0 ? "Out of stock" : stock < minimum ? "Below minimum stock" : quantity >= stock ? `Stock limit · ${quantity} in cart` : quantity ? `Add another · ${quantity} in cart` : "Add to cart"}
+        </button>
+        <button type="button" aria-pressed={compared} aria-label={`Compare ${product.name}`}
+          disabled={!compared && comparison.length >= 3} onClick={() => toggleComparison(product)}
+          className="rounded-lg border border-stone-200 px-3 py-2 text-sm font-semibold text-emerald-800 disabled:text-stone-400">
+          {compared ? "Remove from comparison" : comparison.length >= 3 ? "Comparison full" : "Compare"}
         </button>
       </div>
     </article>

@@ -29,6 +29,25 @@ const productSchema = new mongoose.Schema(
       type: Number,
       min: 1,
     },
+    priceUnit: {
+      type: String,
+      enum: ["metre", "yard", "piece"],
+    },
+    minimumOrderQuantity: {
+      type: Number,
+      min: 1,
+      validate: Number.isSafeInteger,
+    },
+    intendedUses: {
+      type: [{ type: String, trim: true, minlength: 1, maxlength: 40 }],
+      default: undefined,
+      validate: { validator: (uses) => uses == null || uses.length <= 8, message: "Use up to eight intended uses." },
+    },
+    careInstructions: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+    },
     imageUrl: {
       type: String,
       required: true,

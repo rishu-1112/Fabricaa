@@ -1,15 +1,17 @@
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
 import FiltersBar from "../components/FiltersBar";
-import { availableQuantity, isDemoMode, itemPrice } from "../services/catalog";
-import { matchesFabricSearch } from "../services/catalog";
+import { availableQuantity, isDemoMode, itemPrice, matchesFabricSearch, matchesFabricWeight, weightBands } from "../services/catalog";
+import { shortlistLimit } from "../services/shortlist";
 import useCatalog from "../services/useCatalog";
 import { fabricCategories } from "../data/sampleCatalog";
 
 export default function Products() {
   const { saved } = useCart();
+  const [shareStatus, setShareStatus] = useState("");
   const [params, setParams] = useSearchParams();
   const { products, status, retry } = useCatalog(params.get("sample") === "1");
   const resetUrl = status === "sample" && !isDemoMode ? "/products?sample=1" : "/products";
@@ -18,11 +20,19 @@ export default function Products() {
   const query = params.get("q") || "";
   const stock = params.get("stock") === "1";
   const savedOnly = params.get("saved") === "1";
+  const shareUrl = new URL("/shortlist", window.location.origin);
+  if (savedOnly) shareUrl.searchParams.set("fabrics", saved.map(({ _id }) => _id).join(","));
   const source = savedOnly ? saved : products;
   const categories = [...new Set([...fabricCategories.map(({ name }) => name), ...source.map((item) => item.category)])].filter(Boolean);
+  const weight = weightBands.some(({ value }) => value === params.get("weight")) ? params.get("weight") : "";
+  const useOptions = [...new Set(source.flatMap((product) => product.intendedUses ?? []))]
+    .filter(Boolean).sort((a, b) => a.localeCompare(b));
+  const use = useOptions.includes(params.get("use")) ? params.get("use") : "";
   const visible = source.filter((product) =>
     (category === "All" || product.category === category) &&
     (!stock || availableQuantity(product) > 0) &&
+    matchesFabricWeight(product, weight) &&
+    (!use || product.intendedUses?.includes(use)) &&
     matchesFabricSearch(product, query)
   );
   if (sort === "low") visible.sort((a, b) => itemPrice(a) - itemPrice(b));
@@ -42,6 +52,25 @@ export default function Products() {
       <div className="mx-auto max-w-7xl">
         <h1 className="display-title text-5xl sm:text-6xl">{savedOnly ? "Saved Fabrics" : "Fabric Catalog"}</h1>
         <p className="mt-3 text-gray-600">{savedOnly ? "Compare the fabrics you’ve shortlisted." : "Find fabrics by fibre, weight, and intended use."}</p>
+        {savedOnly && saved.length > 0 && (
+          <section className="mt-5 space-y-2 rounded-xl border border-stone-200 bg-white p-4" aria-label="Share saved fabrics">
+            <h2 className="font-semibold">Share your shortlist</h2>
+            {saved.length > shortlistLimit ? <p>Remove fabrics until the shortlist has {shortlistLimit} or fewer items.</p> : (
+              <div className="flex flex-wrap gap-2">
+                <input aria-label="Shortlist link" readOnly value={shareUrl.href} onFocus={(event) => event.target.select()} className="min-w-0 flex-1 rounded-lg border border-stone-200 p-2" />
+                <button type="button" className="rounded-lg bg-emerald-800 px-4 py-2 text-white" onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(shareUrl.href);
+                    setShareStatus("Shortlist link copied.");
+                  } catch {
+                    setShareStatus("Select the shortlist link and copy it manually.");
+                  }
+                }}>Copy link</button>
+              </div>
+            )}
+            {shareStatus && <p role="status" className="text-sm">{shareStatus}</p>}
+          </section>
+        )}
         {status === "sample" && !savedOnly && (
           <div className="mt-5 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             You’re viewing sample fabrics. Prices and availability are illustrative.
@@ -53,7 +82,7 @@ export default function Products() {
             <Search size={19} aria-hidden="true" />
             <input className="w-full bg-transparent py-3" type="search" aria-label="Search fabrics" placeholder="Search names, fibres or uses" value={query} onChange={(event) => updateFilter("q", event.target.value)} />
           </label>
-          <FiltersBar categories={categories} category={category} sort={sort} inStock={stock} savedOnly={savedOnly} updateFilter={updateFilter} />
+          <FiltersBar categories={categories} category={category} sort={sort} inStock={stock} savedOnly={savedOnly} weight={weight} use={use} uses={useOptions} updateFilter={updateFilter} />
         </div>
         {!savedOnly && status === "loading" ? <p role="status">Loading fabrics…</p> :
           !savedOnly && (status === "empty" || status === "unavailable") ? (

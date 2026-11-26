@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Heart, Menu, ShoppingCart, X } from "lucide-react";
+import { Columns2, Heart, Menu, ShoppingCart, X } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import logo from "../assets/newLOGO-Photoroom.png";
 import { useCart } from "../context/CartContext";
@@ -13,7 +13,7 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { totalItems, saved } = useCart();
+  const { totalItems, saved, comparison } = useCart();
   const close = () => setOpen(false);
   const linkClass = ({ isActive }) => `rounded px-2 py-2 hover:text-emerald-700 ${isActive ? "font-semibold text-emerald-700" : "text-gray-700"}`;
 
@@ -28,6 +28,10 @@ export default function Navbar() {
           {links.map(([to, label]) => <NavLink key={to} to={to} end={to === "/"} className={linkClass}>{label}</NavLink>)}
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
+          <Link to="/compare" onClick={close} aria-label={`Compare fabrics, ${comparison.length} selected`} className="relative p-2 text-gray-700 hover:text-emerald-700">
+            <Columns2 size={21} />
+            {comparison.length > 0 && <span aria-hidden="true" className="absolute -right-1 -top-1 rounded-full bg-emerald-700 px-1.5 text-xs text-white">{comparison.length}</span>}
+          </Link>
           <Link to="/products?saved=1" onClick={close} aria-label={`Saved fabrics, ${saved.length}`} className="p-2 text-gray-700 hover:text-emerald-700"><Heart size={21} /></Link>
           <NavLink to="/cart" onClick={close} aria-label={`Fabric cart, ${totalItems} items`} className="relative p-2 text-gray-700 hover:text-emerald-700">
             <ShoppingCart size={21} />

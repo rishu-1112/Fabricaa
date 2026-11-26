@@ -77,7 +77,7 @@ router.post("/quote", limitSubmissions, validateSender, async (req, res) => {
 
   let products;
   try {
-    products = await Product.find({ _id: { $in: ids } }).select("name stockCount inStock").lean();
+    products = await Product.find({ _id: { $in: ids } }).select("name stockCount inStock minimumOrderQuantity priceUnit").lean();
   } catch (error) {
     console.error("Quote catalog lookup failed:", error);
     return res.status(503).json({ error: "The catalog is temporarily unavailable. Try again shortly." });
@@ -90,14 +90,16 @@ router.post("/quote", limitSubmissions, validateSender, async (req, res) => {
     const product = productsById.get(id.toLowerCase());
     const available = product?.inStock !== false && Number.isSafeInteger(product?.stockCount)
       ? Math.max(0, product.stockCount) : 0;
-    if (quantity > available) {
-      issues.push({ id, name: product?.name, available });
+    const configuredMinimum = product?.minimumOrderQuantity;
+    const minimum = Number.isSafeInteger(configuredMinimum) && configuredMinimum > 0 ? configuredMinimum : 1;
+    if (available < minimum || quantity > available || quantity < minimum) {
+      issues.push({ id, name: product?.name, available, minimum });
     } else {
-      lines.push(`- ${product.name} × ${quantity}`);
+      lines.push(`- ${product.name} × ${quantity}${product.priceUnit ? ` (${product.priceUnit})` : ""}`);
     }
   }
   if (issues.length) {
-    return res.status(409).json({ error: "Some fabrics are no longer available in the requested quantity.", issues });
+    return res.status(409).json({ error: "Some quantities are outside the current minimum order or available stock.", issues });
   }
 
   const message = [lines.join("\n"), notes.trim()].filter(Boolean).join("\n\n");

@@ -6,6 +6,8 @@ import Footer from "./components/Footer";
 // Pages
 import Home from "./pages/Home";
 const Products = lazy(() => import("./pages/Product"));
+const Compare = lazy(() => import("./pages/Compare"));
+const Shortlist = lazy(() => import("./pages/Shortlist"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const ProductDetails = lazy(() => import("./pages/ProductDetails"));
@@ -33,6 +35,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/:id" element={<ProductDetails />} />
+              <Route path="/compare" element={<Compare />} />
+              <Route path="/shortlist" element={<Shortlist />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/cart" element={<Cart />} />

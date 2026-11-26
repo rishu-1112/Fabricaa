@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { formatFabricQuantity, minimumQuantity } from "../services/catalog";
 import { apiUrl } from "../services/api";
 
 const fieldClass = "w-full rounded-lg border border-gray-300 px-4 py-3";
@@ -8,6 +9,7 @@ const buttonClass = "rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-whit
 
 export default function Checkout() {
   const { cart, removeFromCart, updateQuantity } = useCart();
+  const belowMinimum = cart.some((item) => item.quantity < minimumQuantity(item));
   const hasSamples = cart.some((item) => item.sample);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -15,7 +17,7 @@ export default function Checkout() {
   const [issues, setIssues] = useState([]);
 
   function downloadSample() {
-    const selection = cart.map(({ name, quantity, sample }) => `- ${name} × ${quantity}${sample ? " (sample fabric)" : ""}`).join("\n");
+    const selection = cart.map(({ name, quantity, sample, priceUnit }) => `- ${name} × ${priceUnit ? formatFabricQuantity(quantity, priceUnit) : quantity}${sample ? " (sample fabric)" : ""}`).join("\n");
     const text = `Fabricaa sample quote request\nIllustrative only. This request has not been sent.\n\n${selection}`;
     const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
     const link = document.createElement("a");
@@ -74,7 +76,8 @@ export default function Checkout() {
         {hasSamples ? (
           <div className="space-y-4">
             <p>Your selection includes sample fabrics. Download it as a draft, or remove the samples from your cart to request a live quote.</p>
-            <button type="button" className={buttonClass} onClick={downloadSample}>Download Sample Quote</button>
+            <button type="button" disabled={belowMinimum} className={buttonClass} onClick={downloadSample}>Download Sample Quote</button>
+            {belowMinimum && <p role="alert">Adjust your cart to meet the minimum quantities before downloading.</p>}
             <Link to="/cart" className="block text-emerald-700 underline">Edit cart</Link>
           </div>
         ) : <form onSubmit={submitQuote} className="space-y-5">
@@ -93,19 +96,24 @@ export default function Checkout() {
           {error && <p role="alert" className="text-red-700">{error}</p>}
           {issues.length > 0 && (
             <ul className="space-y-3 rounded-lg bg-amber-50 p-4">
-              {issues.map(({ id, name, available }) => (
-                <li key={id} className="flex flex-wrap items-center justify-between gap-2">
-                  <span>{name || cart.find((item) => item._id === id)?.name} · {available ? `${available} available` : "Unavailable"}</span>
-                  <button type="button" className="text-emerald-700 underline" onClick={() => {
-                    if (available) updateQuantity(id, available, available);
-                    else removeFromCart(id);
-                    setIssues((current) => current.filter((issue) => issue.id !== id));
-                    if (issues.length === 1) setError("");
-                  }}>
-                    {available ? `Change quantity to ${available}` : "Remove from cart"}
-                  </button>
-                </li>
-              ))}
+              {issues.map(({ id, name, available, minimum = 1 }) => {
+                const item = cart.find((fabric) => fabric._id === id);
+                const canAdjust = available >= minimum;
+                const quantity = Math.max(minimum, Math.min(available, item?.quantity ?? minimum));
+                return (
+                  <li key={id} className="flex flex-wrap items-center justify-between gap-2">
+                    <span>{name || item?.name} · {available ? `${available} available, minimum ${minimum}` : "Unavailable"}</span>
+                    <button type="button" className="text-emerald-700 underline" onClick={() => {
+                      if (canAdjust) updateQuantity(id, quantity, { stockCount: available, minimumOrderQuantity: minimum });
+                      else removeFromCart(id);
+                      setIssues((current) => current.filter((issue) => issue.id !== id));
+                      if (issues.length === 1) setError("");
+                    }}>
+                      {canAdjust ? `Change quantity to ${quantity}` : "Remove from cart"}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
           <button type="submit" disabled={sending} className={buttonClass}>

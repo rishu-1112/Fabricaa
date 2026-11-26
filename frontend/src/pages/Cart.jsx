@@ -1,11 +1,11 @@
 import FabricImage from "../components/FabricImage";
-import { availableQuantity, itemPrice } from "../services/catalog";
+import { availableQuantity, formatFabricQuantity, itemPrice, minimumQuantity } from "../services/catalog";
 import { useCart } from "../context/CartContext";
 import { Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function Cart() {
-  const { cart, removeFromCart, updateQuantity, totalItems, totalPrice, clearCart } = useCart();
+  const { cart, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
 
   if (cart.length === 0) {
     return (
@@ -40,28 +40,29 @@ export default function Cart() {
                 <p className="text-gray-500">{item.material}{item.sample ? " · Sample fabric" : ""}</p>
                 <p className="text-emerald-600 font-semibold mt-2">
                   ₹
-                  {itemPrice(item).toLocaleString("en-IN")}
+                  {itemPrice(item).toLocaleString("en-IN")}{item.priceUnit && ` / ${item.priceUnit}`}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                  disabled={item.quantity <= 1}
+                  disabled={item.quantity <= minimumQuantity(item)}
                   aria-label={`Decrease quantity of ${item.name}`}
                   className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
                 >
                   -
                 </button>
-                <span className="px-2">{item.quantity}</span>
+                <span className="px-2">{formatFabricQuantity(item.quantity, item.priceUnit)}</span>
                 <button
-                  onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                  disabled={item.quantity >= availableQuantity(item)}
+                  onClick={() => updateQuantity(item._id, Math.max(item.quantity + 1, minimumQuantity(item)))}
+                  disabled={Math.max(item.quantity + 1, minimumQuantity(item)) > availableQuantity(item)}
                   aria-label={`Increase quantity of ${item.name}`}
                   className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
                 >
                   +
                 </button>
+                {item.minimumOrderQuantity && <p className="w-full text-xs text-stone-600">Minimum order: {formatFabricQuantity(minimumQuantity(item), item.priceUnit)}</p>}
               </div>
 
               <button
@@ -78,7 +79,7 @@ export default function Cart() {
         {/* Total + Clear */}
         <div className="mt-10 flex flex-col sm:flex-row justify-between items-center border-t pt-6">
           <h3 className="text-lg font-medium text-gray-800">
-            Estimated total ({totalItems} items):{" "}
+            Estimated total:{" "}
             <span className="text-emerald-600 font-semibold">
               ₹{totalPrice.toLocaleString()}
             </span>

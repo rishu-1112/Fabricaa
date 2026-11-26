@@ -6,7 +6,7 @@ import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
 import { sampleProducts } from "../data/sampleCatalog";
 import { apiUrl } from "../services/api";
-import { availableQuantity, isDemoMode, itemPrice } from "../services/catalog";
+import { availableQuantity, formatFabricQuantity, isDemoMode, itemPrice, minimumQuantity } from "../services/catalog";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -59,7 +59,10 @@ function ProductView({ id }) {
   const inCart = cart.find((item) => item._id === id)?.quantity || 0;
   const stock = availableQuantity(product);
   const remaining = Math.max(0, stock - inCart);
-  const selectedQuantity = Math.min(quantity, remaining || 1);
+  const minimum = minimumQuantity(product);
+  const minimumToAdd = Math.max(1, minimum - inCart);
+  const canAdd = remaining >= minimumToAdd;
+  const selectedQuantity = Math.min(Math.max(quantity, minimumToAdd), Math.max(remaining, minimumToAdd));
   const isSaved = saved.some((item) => item._id === id);
   const price = itemPrice(product);
   const related = product.sample ? sampleProducts.filter((item) => item.category === product.category && item._id !== id) : [];
@@ -83,7 +86,7 @@ function ProductView({ id }) {
           <h1 className="text-4xl font-bold">{product.name}</h1>
           <p className="text-gray-600">{product.description}</p>
           <p className="flex items-baseline gap-3 font-semibold">
-            <span className="text-2xl text-emerald-700">₹{price.toLocaleString("en-IN")}</span>
+            <span className="text-2xl text-emerald-700">₹{price.toLocaleString("en-IN")}{product.priceUnit && <span className="text-sm font-normal text-stone-600"> / {product.priceUnit}</span>}</span>
             {price < product.price && <del className="text-gray-500">₹{product.price.toLocaleString("en-IN")}</del>}
             {product.sample && <span className="text-sm text-gray-600">illustrative price</span>}
           </p>
@@ -91,20 +94,29 @@ function ProductView({ id }) {
             <dt>Composition</dt><dd className="font-semibold">{product.material}</dd>
             {product.gsm && <><dt>Weight</dt><dd className="font-semibold">{product.gsm} GSM</dd></>}
             {product.width && <><dt>Width</dt><dd className="font-semibold">{product.width} cm</dd></>}
+            {product.minimumOrderQuantity && <><dt>Minimum order</dt><dd className="font-semibold">{formatFabricQuantity(product.minimumOrderQuantity, product.priceUnit)}</dd></>}
+            {product.intendedUses?.length > 0 && <><dt>Intended uses</dt><dd className="font-semibold">{product.intendedUses.join(", ")}</dd></>}
             <dt>Availability</dt><dd className="font-semibold">{stock > 0 ? `${stock} available` : "Out of stock"}</dd>
           </dl>
+          {product.careInstructions && (
+            <section aria-label="Fabric care">
+              <h2 className="font-semibold">Care instructions</h2>
+              <p className="mt-1 text-sm text-stone-600">{product.careInstructions}</p>
+            </section>
+          )}
           <div className="flex flex-wrap items-end gap-3">
-            {remaining > 0 && <label className="flex flex-col gap-1 text-sm font-medium">
+            {canAdd && <label className="flex flex-col gap-1 text-sm font-medium">
               Quantity
-              <select className="rounded-lg border border-gray-300 bg-white p-2.5" value={selectedQuantity} onChange={(event) => setQuantity(Number(event.target.value))}>
-                {Array.from({ length: Math.min(remaining, 50) }, (_, index) => <option key={index + 1}>{index + 1}</option>)}
+              <select aria-label="Quantity" className="rounded-lg border border-gray-300 bg-white p-2.5" value={selectedQuantity} onChange={(event) => setQuantity(Number(event.target.value))}>
+                {Array.from({ length: Math.min(remaining - minimumToAdd + 1, 50) }, (_, index) => <option key={index + minimumToAdd}>{index + minimumToAdd}</option>)}
               </select>
             </label>}
-            <button type="button" disabled={!remaining} onClick={() => addToCart(product, selectedQuantity)} className="flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 font-semibold text-white disabled:bg-gray-200 disabled:text-gray-600">
-              <ShoppingBag size={18} /> {remaining ? "Add to cart" : stock ? "Stock limit reached" : "Out of stock"}
+            <button type="button" disabled={!canAdd} onClick={() => addToCart(product, selectedQuantity)} className="flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2.5 font-semibold text-white disabled:bg-gray-200 disabled:text-gray-600">
+              <ShoppingBag size={18} /> {canAdd ? "Add to cart" : !stock ? "Out of stock" : stock < minimum ? "Below minimum stock" : "Stock limit reached"}
             </button>
             <button type="button" aria-pressed={isSaved} onClick={() => toggleSaved(product)} className="flex items-center gap-2 rounded-lg border border-emerald-200 px-4 py-2.5 text-emerald-700"><Heart size={18} fill={isSaved ? "currentColor" : "none"} /> {isSaved ? "Saved" : "Save"}</button>
           </div>
+          {minimum > 1 && <p className="text-sm text-stone-600">Minimum order: {formatFabricQuantity(minimum, product.priceUnit)} per fabric.</p>}
           {inCart > 0 && <p role="status"><Link to="/cart" className="text-sm font-semibold text-emerald-700 underline">{inCart} in your cart</Link></p>}
           <div className="flex flex-wrap gap-4 text-sm text-emerald-700">
             <Link to={`/products?${sampleFilter}category=${encodeURIComponent(product.category)}`} className="underline">More {product.category} fabrics</Link>

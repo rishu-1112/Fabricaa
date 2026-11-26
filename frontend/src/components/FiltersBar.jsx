@@ -1,4 +1,6 @@
-export default function FiltersBar({ categories, category, sort, inStock, savedOnly, updateFilter }) {
+import { weightBands } from "../services/catalog";
+
+export default function FiltersBar({ categories, category, sort, inStock, savedOnly, weight, use, uses, updateFilter }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-wrap gap-2" aria-label="Fabric categories" role="group">
@@ -22,6 +24,20 @@ export default function FiltersBar({ categories, category, sort, inStock, savedO
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={savedOnly} onChange={(event) => updateFilter("saved", event.target.checked ? "1" : "")} />
           Saved only
+        </label>
+        <label className="flex flex-wrap items-center gap-2">
+          Fabric weight
+          <select value={weight} onChange={(event) => updateFilter("weight", event.target.value)} className="rounded-lg border border-gray-200 bg-white p-2">
+            <option value="">Any weight</option>
+            {weightBands.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <label className="flex flex-wrap items-center gap-2">
+          Intended use
+          <select value={use} onChange={(event) => updateFilter("use", event.target.value)} className="rounded-lg border border-gray-200 bg-white p-2">
+            <option value="">Any use</option>
+            {uses.map((name) => <option key={name} value={name}>{name}</option>)}
+          </select>
         </label>
         <label className="flex items-center gap-2">
           Sort by

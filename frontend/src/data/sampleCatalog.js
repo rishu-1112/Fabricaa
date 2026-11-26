@@ -31,12 +31,29 @@ const swatches = [
   ["modal-jersey", "Willow Modal Jersey", "Other", "94% modal, 6% elastane", 680, 190, 150, 14, "A silky knit with comfortable recovery for soft tees and draped separates."],
 ];
 
+const sampleSpecifications = {
+  "cotton-poplin": [2, ["Shirting", "Dresses"], "Machine wash cold with similar colours. Line dry and iron while slightly damp."],
+  "cotton-twill": [3, ["Trousers", "Outerwear"], "Machine wash cold and line dry. Iron on medium heat."],
+  "mulberry-silk": [1, ["Occasionwear", "Accessories"], "Professional dry cleaning recommended. Press on low heat through a cloth."],
+  "silk-organza": [1, ["Occasionwear", "Dresses"], "Professional dry cleaning recommended. Press on low heat without steam."],
+  "linen-herringbone": [2, ["Tailoring", "Home textiles"], "Machine wash gently at 30°C. Line dry and iron while damp."],
+  "washed-linen": [3, ["Accessories", "Home textiles", "Outerwear"], "Machine wash gently at 30°C. Line dry."],
+  "selvedge-denim": [3, ["Trousers", "Outerwear"], "Wash inside out in cold water with dark colours. Line dry."],
+  "lightweight-denim": [2, ["Shirting", "Dresses"], "Machine wash cold, inside out. Avoid high dryer heat."],
+  "wool-flannel": [2, ["Trousers", "Tailoring"], "Professional dry cleaning recommended. Air between wears."],
+  "wool-coating": [2, ["Outerwear"], "Professional dry cleaning recommended. Do not tumble dry."],
+  "performance-ripstop": [2, ["Activewear", "Accessories", "Linings"], "Machine wash cold on a gentle cycle. Line dry."],
+  "modal-jersey": [2, ["Shirting", "Dresses"], "Machine wash cold on a gentle cycle. Dry flat."],
+};
+
 export const sampleProducts = swatches.map(([
   slug, name, category, material, price, gsm, width, stockCount, description, discountPrice,
 ], index) => {
+  const [minimumOrderQuantity, intendedUses, careInstructions] = sampleSpecifications[slug];
   const imageUrl = fabricCategories.find((fabric) => fabric.name === category).image;
   return {
     _id: `sample-${slug}`, name, category, material, price, discountPrice, gsm, width,
+    priceUnit: "metre", minimumOrderQuantity, intendedUses, careInstructions,
     stockCount, inStock: stockCount > 0, imageUrl, description, sample: true,
     isFeatured: [0, 2, 4, 6].includes(index),
     createdAt: new Date(Date.UTC(2026, 0, swatches.length - index)).toISOString(),

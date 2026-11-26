@@ -7,6 +7,7 @@ import Product from "../models/productModel.js";
 const router = express.Router();
 const validateFields = validateCatalogFields([
   "name", "description", "category", "material", "gsm", "width", "imageUrl",
+  "priceUnit", "minimumOrderQuantity", "intendedUses", "careInstructions",
   "gallery", "price", "discountPrice", "inStock", "stockCount", "isFeatured",
 ]);
 
