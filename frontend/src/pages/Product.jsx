@@ -10,6 +10,8 @@ import { shortlistLimit } from "../services/shortlist";
 import useCatalog from "../services/useCatalog";
 import { fabricCategories } from "../data/sampleCatalog";
 
+const revealEase = [0.22, 1, 0.36, 1];
+
 export default function Products() {
   const { saved } = useCart();
   const reduceMotion = useReducedMotion();
@@ -55,7 +57,7 @@ export default function Products() {
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.4, ease: revealEase }}
         >
           <h1 className="display-title text-5xl sm:text-6xl">{savedOnly ? "Saved Fabrics" : "Fabric Catalog"}</h1>
           <p className="mt-3 text-gray-600">{savedOnly ? "Compare the fabrics you’ve shortlisted." : "Find fabrics by fibre, weight, and intended use."}</p>
@@ -109,12 +111,18 @@ export default function Products() {
             </div>
             {visible.length ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {visible.map((product) => (
+                {visible.map((product, index) => (
                   <motion.div
                     key={product._id}
-                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
+                    layout={reduceMotion ? false : "position"}
+                    initial={reduceMotion ? false : { opacity: 0, translateY: 10 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{
+                      duration: 0.32,
+                      ease: revealEase,
+                      delay: Math.min(index, 5) * 0.024,
+                      layout: { type: "spring", stiffness: 420, damping: 38 },
+                    }}
                   >
                     <ProductCard product={product} />
                   </motion.div>
