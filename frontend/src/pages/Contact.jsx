@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { apiUrl } from "../services/api";
 import { isDemoMode } from "../services/catalog";
 import FabricFaq from "../components/FabricFaq";
+import MillMap from "../components/MillMap";
+import ScrollReveal from "../components/ScrollRevealAbout";
 
 const topics = {
   general: "General question",
@@ -10,8 +12,6 @@ const topics = {
   bulk: "Bulk fabric inquiry",
   partnership: "Partnership",
 };
-
-const field = "mt-1 w-full rounded-lg border border-gray-300 px-3 py-2.5";
 
 export default function Contact() {
   const [params] = useSearchParams();
@@ -34,6 +34,18 @@ export default function Contact() {
 
     setSending(true);
     setFeedback(null);
+
+    if (isDemoMode) {
+      await new Promise((resolve) => setTimeout(resolve, 450));
+      form.reset();
+      setFeedback({
+        error: false,
+        text: "Demo draft saved locally. Connect the live backend to send real messages.",
+      });
+      setSending(false);
+      return;
+    }
+
     try {
       const response = await fetch(apiUrl("/contact"), {
         method: "POST",
@@ -59,48 +71,91 @@ export default function Contact() {
   }
 
   return (
-    <section className="bg-gray-50">
-      <div className="mx-auto max-w-6xl px-6 py-14">
-        <h1 className="text-4xl font-bold">Get in Touch</h1>
-        <p className="mb-9 mt-3 text-gray-600">Ask about swatches, availability, or sourcing for your next project.</p>
-        <div className="grid items-start gap-8 md:grid-cols-[1fr_1.4fr]">
-          <aside className="space-y-4">
-            <div className="rounded-xl bg-emerald-50 p-5">
-              <h2 className="font-semibold">Request pricing for multiple fabrics</h2>
-              <p className="my-2 text-sm text-gray-700">Add your fabrics to a cart so your quote includes the right items and quantities.</p>
-              <Link className="text-sm font-semibold text-emerald-700 underline" to="/products">Browse the catalog</Link>
+    <section className="paper">
+      <div className="mx-auto max-w-7xl px-6 py-14 sm:px-10">
+        <ScrollReveal>
+          <h1 className="display-title theme-text text-5xl sm:text-6xl">Get in touch</h1>
+          <p className="theme-muted mb-10 mt-3 max-w-xl">
+            Ask about swatches, availability, or sourcing for your next project.
+          </p>
+        </ScrollReveal>
+
+        <div className="grid items-start gap-8 lg:grid-cols-[0.9fr_1.2fr]">
+          <ScrollReveal className="space-y-4" delay={0.05}>
+            <div className="rounded-3xl p-6 text-white" style={{ backgroundColor: "var(--fb-hero)" }}>
+              <h2 className="text-xl font-semibold">Request pricing for multiple fabrics</h2>
+              <p className="my-3 text-sm text-emerald-50/85">
+                Add fabrics to your cart so your quote includes the right items and quantities.
+              </p>
+              <Link className="inline-flex font-semibold text-emerald-100 underline underline-offset-4" to="/products">
+                Browse the catalog
+              </Link>
             </div>
-            <div className="rounded-xl border border-gray-200 bg-white p-5">
-              <h2 className="font-semibold">Example of a swatch inquiry</h2>
-              <p className="mt-2 text-sm text-gray-600">“I’m comparing cotton poplin and linen for summer shirts. Could you share swatch options and minimum quantities?”</p>
+            <div className="surface rounded-3xl border p-6">
+              <h2 className="theme-text font-semibold">Example of a swatch inquiry</h2>
+              <p className="theme-muted mt-2 text-sm leading-relaxed">
+                “I’m comparing cotton poplin and linen for summer shirts. Could you share swatch options and minimum
+                quantities?”
+              </p>
             </div>
-          </aside>
-          {isDemoMode ? (
-            <section className="rounded-2xl border border-stone-200 bg-white p-6">
-              <h2 className="text-xl font-semibold">Contact form unavailable in demo</h2>
-              <p className="mt-2 text-gray-600">You can browse the sample catalog and download a draft quote from your cart.</p>
-            </section>
-          ) : <form onSubmit={submit} className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6">
-            <h2 className="text-xl font-semibold">Send a Message</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm font-medium">Name<input className={field} name="name" autoComplete="name" maxLength={100} required /></label>
-              <label className="block text-sm font-medium">Email<input className={field} name="email" autoComplete="email" type="email" maxLength={254} required /></label>
-            </div>
-            <label className="block text-sm font-medium">
-              Topic
-              <select key={initialTopic} name="topic" defaultValue={initialTopic} className={field}>
-                {Object.entries(topics).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </label>
-            <div>
-              <label htmlFor="contact-message" className="block text-sm font-medium">Message</label>
-              <textarea id="contact-message" className={field} name="message" key={fabric} defaultValue={fabric ? `Could you share swatch options for ${fabric}?` : ""} maxLength={1900} rows={5} required />
-            </div>
-            <button disabled={sending} className="rounded-lg bg-emerald-700 px-5 py-2.5 font-semibold text-white disabled:opacity-50">{sending ? "Sending…" : "Send Message"}</button>
-            {feedback && <p role={feedback.error ? "alert" : "status"} className={feedback.error ? "text-red-700" : "text-green-800"}>{feedback.text}</p>}
-          </form>}
+            {isDemoMode && (
+              <p className="rounded-2xl border border-amber-200 theme-soft px-4 py-3 text-sm text-amber-950">
+                Demo mode: the form works for practice, but messages are not emailed.
+              </p>
+            )}
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.1}>
+            <form onSubmit={submit} className="surface space-y-4 rounded-3xl border p-6 shadow-sm sm:p-8">
+              <h2 className="theme-text text-xl font-semibold">Send a message</h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="block text-sm font-medium">
+                  Name
+                  <input className="field-input" name="name" autoComplete="name" maxLength={100} required />
+                </label>
+                <label className="block text-sm font-medium">
+                  Email
+                  <input className="field-input" name="email" autoComplete="email" type="email" maxLength={254} required />
+                </label>
+              </div>
+              <label className="block text-sm font-medium">
+                Topic
+                <select key={initialTopic} name="topic" defaultValue={initialTopic} className="field-input">
+                  {Object.entries(topics).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div>
+                <label htmlFor="contact-message" className="block text-sm font-medium">
+                  Message
+                </label>
+                <textarea
+                  id="contact-message"
+                  className="field-input"
+                  name="message"
+                  key={fabric}
+                  defaultValue={fabric ? `Could you share swatch options for ${fabric}?` : ""}
+                  maxLength={1900}
+                  rows={5}
+                  required
+                />
+              </div>
+              <button disabled={sending} className="btn-primary disabled:opacity-50">
+                {sending ? "Sending…" : "Send message"}
+              </button>
+              {feedback && (
+                <p role={feedback.error ? "alert" : "status"} className={feedback.error ? "text-red-700" : "theme-brand"}>
+                  {feedback.text}
+                </p>
+              )}
+            </form>
+          </ScrollReveal>
         </div>
       </div>
+      <MillMap />
       <FabricFaq />
     </section>
   );

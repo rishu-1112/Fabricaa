@@ -10,14 +10,17 @@ test("production demo supports direct links, comparisons, shared shortlists and 
     assert.ok(routes.some((rule) => rule.source === source && rule.destination === "/index.html"), `Missing Vercel route ${source}`);
   }
 
-  const server = await preview({ preview: { host: "127.0.0.1", port: 0 } });
+  const server = await preview({
+    mode: "demo",
+    preview: { host: "127.0.0.1", port: 0 },
+  });
   t.after(() => new Promise((done) => server.httpServer.close(done)));
   const base = `http://127.0.0.1:${server.httpServer.address().port}`;
   const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE });
   t.after(() => browser.close());
 
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
-  page.setDefaultTimeout(10_000);
+  page.setDefaultTimeout(12_000);
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
@@ -29,9 +32,9 @@ test("production demo supports direct links, comparisons, shared shortlists and 
   await page.getByRole("link", { name: "2 in your cart" }).click();
   assert.equal(await page.getByRole("button", { name: "Decrease quantity of Cloud Cotton Poplin" }).isDisabled(), true);
   await page.getByText("Minimum order: 2 metres").waitFor();
-  await page.getByRole("link", { name: "Preview Sample Quote" }).click();
+  await page.getByRole("link", { name: /Preview sample quote/i }).click();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download Sample Quote" }).click();
+  await page.getByRole("button", { name: /Download sample quote/i }).click();
   const download = await downloadPromise;
   assert.match(await readFile(await download.path(), "utf8"), /Cloud Cotton Poplin × 2 metres/);
 
@@ -59,7 +62,7 @@ test("production demo supports direct links, comparisons, shared shortlists and 
   assert.equal(new URL(share).searchParams.get("fabrics"), "sample-cotton-poplin");
   const recipient = await browser.newPage();
   await recipient.goto(share);
-  await recipient.getByRole("heading", { name: "Shared Fabric Shortlist" }).waitFor();
+  await recipient.getByRole("heading", { name: /Shared fabric shortlist/i }).waitFor();
   await recipient.getByRole("heading", { name: "Cloud Cotton Poplin" }).waitFor();
   await recipient.getByRole("button", { name: "Save this shortlist" }).click();
   await recipient.getByRole("link", { name: "View saved fabrics" }).click();
@@ -72,5 +75,58 @@ test("production demo supports direct links, comparisons, shared shortlists and 
   });
   await recipient.goto(`${base}/compare`);
   await recipient.getByText("Price units differ or are unspecified.", { exact: false }).waitFor();
+  assert.deepEqual(pageErrors, []);
+});
+
+test("smoke: about, contact map honesty, skip link and more menu keyboard", async (t) => {
+  const server = await preview({
+    mode: "demo",
+    preview: { host: "127.0.0.1", port: 0 },
+  });
+  t.after(() => new Promise((done) => server.httpServer.close(done)));
+  const base = `http://127.0.0.1:${server.httpServer.address().port}`;
+  const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE });
+  t.after(() => browser.close());
+
+  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  page.setDefaultTimeout(12_000);
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  await page.goto(`${base}/`);
+  await page.getByRole("link", { name: "Skip to content" }).focus();
+  await page.keyboard.press("Enter");
+  await page.locator("#main-content").waitFor();
+
+  await page.getByRole("button", { name: "More" }).click();
+  await page.getByRole("menu", { name: "More pages" }).waitFor();
+  await page.keyboard.press("Escape");
+  await page.getByRole("menu", { name: "More pages" }).waitFor({ state: "hidden" });
+
+  await page.goto(`${base}/about`);
+  await page.getByRole("heading", { name: "About Fabricaa", level: 1 }).waitFor();
+  await page.getByText("Example dashboard figures", { exact: false }).waitFor();
+  await page.getByText("Sample location").first().waitFor();
+  await page.getByRole("heading", { name: "Find our mill" }).waitFor();
+
+  await page.goto(`${base}/contact#location`);
+  await page.getByText("Illustrative map pin for the demo storefront", { exact: false }).waitFor();
+  await page.getByText("Sample location").first().waitFor();
+  await page.getByRole("region", { name: /Sample map showing an illustrative Fabricaa mill pin/i }).waitFor();
+  await page.getByRole("link", { name: /Open sample pin in OpenStreetMap/i }).waitFor();
+
+  await page.goto(`${base}/cart`);
+  await page.getByRole("heading", { name: "Your cart is empty" }).waitFor();
+  await page.getByRole("link", { name: /Browse products/i }).waitFor();
+  const overlap = await page.evaluate(() => {
+    const heading = document.querySelector("h2, h1");
+    const link = [...document.querySelectorAll("a")].find((node) => /browse products/i.test(node.textContent || ""));
+    if (!heading || !link) return true;
+    const a = heading.getBoundingClientRect();
+    const b = link.getBoundingClientRect();
+    return !(b.top >= a.bottom - 1);
+  });
+  assert.equal(overlap, false, "Browse products should sit below the empty-cart heading");
+
   assert.deepEqual(pageErrors, []);
 });

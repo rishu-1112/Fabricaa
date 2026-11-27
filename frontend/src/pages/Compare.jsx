@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import FabricImage from "../components/FabricImage";
+import ScrollReveal from "../components/ScrollRevealAbout";
 import { useCart } from "../context/CartContext";
 import { formatFabricQuantity, itemPrice } from "../services/catalog";
 
@@ -20,38 +21,81 @@ export default function Compare() {
   const mixedPricing = comparison.some((item) => item.sample) && comparison.some((item) => !item.sample);
 
   return (
-    <section className="mx-auto min-h-[60vh] max-w-6xl space-y-5 px-5 py-12">
-      <h1 className="display-title text-5xl">Compare Fabrics</h1>
-      <Link to="/products" className="inline-block text-emerald-800 underline">Browse fabrics</Link>
-      {!comparison.length ? <p>Choose up to three fabrics using the Compare button in the catalog.</p> : (
+    <section className="paper mx-auto min-h-[60vh] max-w-6xl px-6 py-14 sm:px-10">
+      <ScrollReveal>
+        <h1 className="display-title theme-text text-5xl">Compare fabrics</h1>
+        <p className="theme-muted mt-3 max-w-xl">Place up to three fabrics side by side to check price, weight, and care.</p>
+        <Link to="/products" className="mt-4 inline-block font-semibold theme-brand underline">
+          Browse fabrics
+        </Link>
+      </ScrollReveal>
+
+      {!comparison.length ? (
+        <ScrollReveal className="mt-10 rounded-3xl border border-[color:var(--fb-border)] surface p-8 text-center shadow-sm" delay={0.05}>
+          <p className="theme-muted">Choose up to three fabrics using the Compare button in the catalog.</p>
+          <Link to="/products" className="btn-primary mt-6 inline-flex">
+            Open catalog
+          </Link>
+        </ScrollReveal>
+      ) : (
         <>
           {(differentUnits || missingUnits || mixedPricing) && (
-            <p className="rounded-lg bg-amber-50 p-4 text-sm text-amber-950">
-              {differentUnits || missingUnits ? "Price units differ or are unspecified. Compare prices only where the units match. " : ""}
+            <p className="mt-6 rounded-2xl border border-amber-200 theme-soft p-4 text-sm text-amber-950" role="status">
+              {differentUnits || missingUnits
+                ? "Price units differ or are unspecified. Compare prices only where the units match. "
+                : ""}
               {mixedPricing ? "Sample prices are illustrative." : ""}
             </p>
           )}
-          <div tabIndex={0} role="region" aria-label="Scrollable fabric comparison" className="overflow-x-auto rounded-xl border border-stone-200 bg-white">
+          <div
+            tabIndex={0}
+            role="region"
+            aria-label="Scrollable fabric comparison"
+            className="mt-6 overflow-x-auto rounded-3xl border border-[color:var(--fb-border)] surface shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
+          >
             <table className="w-full text-left text-sm">
               <caption className="sr-only">Fabric specifications side by side</caption>
               <thead>
                 <tr>
-                  <th scope="col" className="w-32 p-3 align-bottom">Specification</th>
+                  <th scope="col" className="w-32 p-4 align-bottom theme-muted">
+                    Specification
+                  </th>
                   {comparison.map((item) => (
-                    <th key={item._id} scope="col" className="min-w-44 p-3 align-top">
-                      <FabricImage src={item.imageUrl} category={item.category} alt="" className="mb-2 aspect-video w-full max-w-xs rounded-md object-cover" />
-                      <Link to={`/products/${item._id}`} className="block text-base text-emerald-900 hover:underline">{item.name}</Link>
-                      {item.sample && <p className="text-xs font-normal text-stone-600">Sample</p>}
-                      <button type="button" onClick={() => toggleComparison(item)} aria-label={`Remove ${item.name} from comparison`} className="mt-2 font-normal text-emerald-800 underline">Remove</button>
+                    <th key={item._id} scope="col" className="min-w-44 p-4 align-top">
+                      <FabricImage
+                        src={item.imageUrl}
+                        category={item.category}
+                        alt=""
+                        loading="lazy"
+                        className="mb-3 aspect-video w-full max-w-xs rounded-2xl object-cover"
+                      />
+                      <Link to={`/products/${item._id}`} className="block text-base font-semibold theme-text hover:underline">
+                        {item.name}
+                      </Link>
+                      {item.sample && <p className="text-xs font-normal theme-muted">Sample</p>}
+                      <button
+                        type="button"
+                        onClick={() => toggleComparison(item)}
+                        aria-label={`Remove ${item.name} from comparison`}
+                        className="mt-2 font-normal theme-brand underline"
+                      >
+                        Remove
+                      </button>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {specifications.map(([label, value]) => (
-                  <tr key={label} className="border-t border-stone-200">
-                    <th scope="row" className="p-3 font-semibold">{label}</th>
-                    {comparison.map((item) => <td key={item._id} className="p-3 align-top">{value(item) || "Not specified"}</td>)}
+                  <tr key={label} className="border-t border-[color:var(--fb-border)]">
+                    <th scope="row" className="p-4 font-semibold theme-text">
+                      {label}
+                    </th>
+                    {comparison.map((item) => (
+                      <td key={item._id} className="p-4 align-top theme-muted">
+                        {value(item) || "Not specified"}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>

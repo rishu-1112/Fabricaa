@@ -9,38 +9,48 @@ export default function Cart() {
 
   if (cart.length === 0) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-3xl font-semibold text-gray-700 mb-4">Your cart is empty</h2>
-        <Link to="/products" className="text-emerald-600 hover:underline">
-          Browse Products
+      <section className="mx-auto flex min-h-[60vh] w-full max-w-lg flex-col items-center justify-center px-6 py-20 text-center">
+        <h2 className="display-title theme-text mb-4 text-4xl">Your cart is empty</h2>
+        <p className="theme-muted mb-8">
+          Browse the catalog and add fabrics when you are ready to request a quote.
+        </p>
+        <Link to="/products" className="btn-primary relative z-10">
+          Browse products
         </Link>
-      </div>
+      </section>
     );
   }
 
   return (
-    <section className="py-20 bg-gray-50 min-h-screen">
-      <div className="max-w-5xl mx-auto px-6">
-        <h1 className="text-3xl font-bold mb-8">Your Fabric Cart</h1>
+    <section className="paper min-h-screen py-14">
+      <div className="mx-auto max-w-5xl px-6 sm:px-10">
+        <h1 className="display-title theme-text mb-8 text-4xl">Your fabric cart</h1>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {cart.map((item) => (
             <div
               key={item._id}
-              className="flex flex-col sm:flex-row items-center gap-6 bg-white rounded-2xl shadow-md p-4"
+              className="surface flex flex-col items-center gap-5 rounded-3xl border p-4 shadow-sm sm:flex-row"
             >
               <FabricImage
                 category={item.category}
                 src={item.imageUrl}
                 alt={item.name}
-                className="w-32 h-32 object-cover rounded-lg"
+                className="h-28 w-28 rounded-2xl object-cover"
               />
-              <div className="flex-1 text-left">
-                <h3 className="text-lg font-semibold text-gray-800"><Link className="hover:underline" to={`/products/${item._id}`}>{item.name}</Link></h3>
-                <p className="text-gray-500">{item.material}{item.sample ? " · Sample fabric" : ""}</p>
-                <p className="text-emerald-600 font-semibold mt-2">
-                  ₹
-                  {itemPrice(item).toLocaleString("en-IN")}{item.priceUnit && ` / ${item.priceUnit}`}
+              <div className="min-w-0 flex-1 text-left">
+                <h3 className="text-lg font-semibold theme-text">
+                  <Link className="hover:underline" to={`/products/${item._id}`}>
+                    {item.name}
+                  </Link>
+                </h3>
+                <p className="theme-muted">
+                  {item.material}
+                  {item.sample ? " · Sample fabric" : ""}
+                </p>
+                <p className="mt-2 font-semibold theme-brand">
+                  ₹{itemPrice(item).toLocaleString("en-IN")}
+                  {item.priceUnit && ` / ${item.priceUnit}`}
                 </p>
               </div>
 
@@ -49,7 +59,7 @@ export default function Cart() {
                   onClick={() => updateQuantity(item._id, item.quantity - 1)}
                   disabled={item.quantity <= minimumQuantity(item)}
                   aria-label={`Decrease quantity of ${item.name}`}
-                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
+                  className="qty-btn rounded-lg px-3 py-1 disabled:opacity-40"
                 >
                   -
                 </button>
@@ -58,17 +68,21 @@ export default function Cart() {
                   onClick={() => updateQuantity(item._id, Math.max(item.quantity + 1, minimumQuantity(item)))}
                   disabled={Math.max(item.quantity + 1, minimumQuantity(item)) > availableQuantity(item)}
                   aria-label={`Increase quantity of ${item.name}`}
-                  className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-40"
+                  className="qty-btn rounded-lg px-3 py-1 disabled:opacity-40"
                 >
                   +
                 </button>
-                {item.minimumOrderQuantity && <p className="w-full text-xs text-stone-600">Minimum order: {formatFabricQuantity(minimumQuantity(item), item.priceUnit)}</p>}
+                {item.minimumOrderQuantity && (
+                  <p className="w-full text-xs theme-muted">
+                    Minimum order: {formatFabricQuantity(minimumQuantity(item), item.priceUnit)}
+                  </p>
+                )}
               </div>
 
               <button
                 onClick={() => removeFromCart(item._id)}
                 aria-label={`Remove ${item.name}`}
-                className="text-red-500 hover:text-red-600 transition"
+                className="text-red-500 transition hover:text-red-600"
               >
                 <Trash2 size={20} />
               </button>
@@ -76,23 +90,17 @@ export default function Cart() {
           ))}
         </div>
 
-        {/* Total + Clear */}
-        <div className="mt-10 flex flex-col sm:flex-row justify-between items-center border-t pt-6">
-          <h3 className="text-lg font-medium text-gray-800">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-[color:var(--fb-border)] pt-6 sm:flex-row">
+          <h3 className="text-lg font-medium theme-text">
             Estimated total:{" "}
-            <span className="text-emerald-600 font-semibold">
-              ₹{totalPrice.toLocaleString()}
-            </span>
+            <span className="font-semibold theme-brand">₹{totalPrice.toLocaleString()}</span>
           </h3>
-          <div className="flex gap-4 mt-4 sm:mt-0">
-            <button
-              onClick={clearCart}
-              className="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
-            >
-              Clear Cart
+          <div className="flex flex-wrap gap-3">
+            <button onClick={clearCart} className="btn-secondary">
+              Clear cart
             </button>
-            <Link to="/checkout" className="px-6 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
-              {cart.some((item) => item.sample) ? "Preview Sample Quote" : "Request a Quote"}
+            <Link to="/checkout" className="btn-primary">
+              {cart.some((item) => item.sample) ? "Preview sample quote" : "Request a quote"}
             </Link>
           </div>
         </div>
