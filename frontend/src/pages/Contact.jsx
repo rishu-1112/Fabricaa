@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Mail, Phone } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { apiUrl } from "../services/api";
 import { isDemoMode } from "../services/catalog";
@@ -64,7 +65,16 @@ export default function Contact() {
         <h1 className="text-4xl font-bold">Get in Touch</h1>
         <p className="mb-9 mt-3 text-gray-600">Ask about swatches, availability, or sourcing for your next project.</p>
         <div className="grid items-start gap-8 md:grid-cols-[1fr_1.4fr]">
-          <aside className="space-y-4">
+          <aside className="space-y-4" aria-label="Contact information">
+            <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-5">
+              <h2 className="font-semibold">Email or call</h2>
+              <a href="mailto:fabrica.textile@gmail.com" className="flex items-center gap-2 break-all text-sm text-emerald-800 underline">
+                <Mail size={18} className="shrink-0" aria-hidden="true" /> fabrica.textile@gmail.com
+              </a>
+              <a href="tel:+916209094913" className="flex items-center gap-2 text-sm text-emerald-800 underline">
+                <Phone size={18} aria-hidden="true" /> +91 62090 94913
+              </a>
+            </div>
             <div className="rounded-xl bg-emerald-50 p-5">
               <h2 className="font-semibold">Request pricing for multiple fabrics</h2>
               <p className="my-2 text-sm text-gray-700">Add your fabrics to a cart so your quote includes the right items and quantities.</p>
@@ -78,7 +88,7 @@ export default function Contact() {
           {isDemoMode ? (
             <section className="rounded-2xl border border-stone-200 bg-white p-6">
               <h2 className="text-xl font-semibold">Contact form unavailable in demo</h2>
-              <p className="mt-2 text-gray-600">You can browse the sample catalog and download a draft quote from your cart.</p>
+              <p className="mt-2 text-gray-600">You can email or call us directly, or browse the sample catalog and download a draft quote from your cart.</p>
             </section>
           ) : <form onSubmit={submit} className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6">
             <h2 className="text-xl font-semibold">Send a Message</h2>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 import ProductCard from "../components/ProductCard";
 import { useCart } from "../context/CartContext";
 import FiltersBar from "../components/FiltersBar";
@@ -11,6 +12,7 @@ import { fabricCategories } from "../data/sampleCatalog";
 
 export default function Products() {
   const { saved } = useCart();
+  const reduceMotion = useReducedMotion();
   const [shareStatus, setShareStatus] = useState("");
   const [params, setParams] = useSearchParams();
   const { products, status, retry } = useCatalog(params.get("sample") === "1");
@@ -50,8 +52,14 @@ export default function Products() {
   return (
     <section className="paper min-h-screen px-6 py-12">
       <div className="mx-auto max-w-7xl">
-        <h1 className="display-title text-5xl sm:text-6xl">{savedOnly ? "Saved Fabrics" : "Fabric Catalog"}</h1>
-        <p className="mt-3 text-gray-600">{savedOnly ? "Compare the fabrics you’ve shortlisted." : "Find fabrics by fibre, weight, and intended use."}</p>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+        >
+          <h1 className="display-title text-5xl sm:text-6xl">{savedOnly ? "Saved Fabrics" : "Fabric Catalog"}</h1>
+          <p className="mt-3 text-gray-600">{savedOnly ? "Compare the fabrics you’ve shortlisted." : "Find fabrics by fibre, weight, and intended use."}</p>
+        </motion.div>
         {savedOnly && saved.length > 0 && (
           <section className="mt-5 space-y-2 rounded-xl border border-stone-200 bg-white p-4" aria-label="Share saved fabrics">
             <h2 className="font-semibold">Share your shortlist</h2>
@@ -101,7 +109,16 @@ export default function Products() {
             </div>
             {visible.length ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {visible.map((product) => <ProductCard key={product._id} product={product} />)}
+                {visible.map((product) => (
+                  <motion.div
+                    key={product._id}
+                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                ))}
               </div>
             ) : <p className="rounded-xl bg-white p-8 text-center text-gray-600">{savedOnly && !saved.length ? "Use the heart on any fabric to save it here." : "No fabrics match your filters."}</p>}
           </>
