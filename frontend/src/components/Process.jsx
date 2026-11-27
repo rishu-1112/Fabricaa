@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import processVideo from "../assets/processFibre.mp4";
 
 const steps = [
   { title: "Spinning", description: "Transforming raw fibres into fine threads." },
@@ -13,8 +14,16 @@ export default function Process() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="display-title text-4xl">From Fibre to Fabric</h2>
-          <Link to="/about" className="font-semibold text-emerald-800 underline underline-offset-4">See the process video</Link>
+          <Link to="/about" className="font-semibold text-emerald-800 underline underline-offset-4">Learn about Fabricaa</Link>
         </div>
+        <video
+          src={processVideo}
+          aria-label="Textile process video"
+          controls
+          playsInline
+          preload="metadata"
+          className="mb-6 aspect-video max-h-96 w-full rounded-xl bg-emerald-950 object-contain"
+        />
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map(({ title, description }) => (
             <li key={title} className="rounded-xl border border-stone-200 bg-white p-5">

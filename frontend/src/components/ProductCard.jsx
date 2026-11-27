@@ -15,15 +15,15 @@ export default function ProductCard({ product }) {
   const url = `/products/${product._id}`;
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-white border border-stone-200 shadow-sm transition hover:shadow-md">
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl bg-white border border-stone-200 shadow-sm motion-safe:transition-shadow motion-safe:duration-300 hover:shadow-md">
       <div className="relative">
         <Link to={url} aria-label={`View ${product.name}`} className="group block overflow-hidden">
-          <FabricImage src={product.imageUrl} category={product.category} alt="" loading="lazy" className="aspect-[5/4] w-full object-cover motion-safe:transition-transform motion-safe:group-hover:scale-105" />
+          <FabricImage src={product.imageUrl} category={product.category} alt="" loading="lazy" className="aspect-[5/4] w-full object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out motion-safe:group-hover:scale-[1.035]" />
         </Link>
         <button
           type="button" aria-pressed={selected} aria-label={`Save ${product.name}`} title={selected ? "Remove from saved fabrics" : "Save fabric"}
           onClick={() => toggleSaved(product)}
-          className="absolute right-3 top-3 rounded-full bg-white p-2.5 text-emerald-700 shadow"
+          className="absolute right-3 top-3 rounded-full bg-white p-2.5 text-emerald-700 shadow hover:bg-emerald-50 aria-pressed:bg-emerald-50 motion-safe:transition motion-safe:duration-200 motion-safe:active:scale-90"
         >
           <Heart size={19} fill={selected ? "currentColor" : "none"} />
         </button>
@@ -48,13 +48,13 @@ export default function ProductCard({ product }) {
         </div>
         <button
           type="button" disabled={stock < minimum || quantity >= stock} onClick={() => addToCart(product)}
-          className="mt-auto flex items-center justify-center gap-2 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:bg-gray-100 disabled:text-gray-600"
+          className="mt-auto flex items-center justify-center gap-2 rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800 motion-safe:transition-colors disabled:bg-gray-100 disabled:text-gray-600"
         >
           <ShoppingBag size={16} /> {stock === 0 ? "Out of stock" : stock < minimum ? "Below minimum stock" : quantity >= stock ? `Stock limit · ${quantity} in cart` : quantity ? `Add another · ${quantity} in cart` : "Add to cart"}
         </button>
         <button type="button" aria-pressed={compared} aria-label={`Compare ${product.name}`}
           disabled={!compared && comparison.length >= 3} onClick={() => toggleComparison(product)}
-          className="rounded-lg border border-stone-200 px-3 py-2 text-sm font-semibold text-emerald-800 disabled:text-stone-400">
+          className="rounded-lg border border-stone-200 px-3 py-2 text-sm font-semibold text-emerald-800 enabled:hover:border-emerald-300 aria-pressed:border-emerald-300 aria-pressed:bg-emerald-50 motion-safe:transition-colors disabled:text-stone-400">
           {compared ? "Remove from comparison" : comparison.length >= 3 ? "Comparison full" : "Compare"}
         </button>
       </div>

@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import heroVideo from "../assets/fabric-bg.mp4";
 import heroPoster from "../assets/fabric-poster.webp";
 
 export default function Hero() {
@@ -22,10 +23,15 @@ export default function Hero() {
             </Link>
           </div>
         </div>
-        <img
-          src={heroPoster}
-          alt="Fabric shown in close-up"
-          fetchPriority="high"
+        <video
+          src={heroVideo}
+          poster={heroPoster}
+          aria-label="Fabric close-up video"
+          controls
+          muted
+          loop
+          playsInline
+          preload="none"
           className="h-64 w-full object-cover sm:h-80 md:h-full"
         />
       </div>
