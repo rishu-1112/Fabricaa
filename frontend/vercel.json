@@ -8,6 +8,9 @@
     { "source": "/about", "destination": "/index.html" },
     { "source": "/contact", "destination": "/index.html" },
     { "source": "/cart", "destination": "/index.html" },
-    { "source": "/checkout", "destination": "/index.html" }
+    { "source": "/checkout", "destination": "/index.html" },
+    { "source": "/calculator", "destination": "/index.html" },
+    { "source": "/swatches", "destination": "/index.html" },
+    { "source": "/quotes", "destination": "/index.html" }
   ]
 }

@@ -23,12 +23,22 @@ export function availableQuantity(product) {
 
 export function matchesFabricSearch(product, query) {
   const searchable = [
-    product.name, product.material, product.category, product.description, ...(product.intendedUses ?? []),
+    product.name, product.material, product.category, product.description, product.colour, product.finish, product.stretch,
+    ...(product.intendedUses ?? []),
     product.gsm && `${product.gsm} GSM`, product.width && `${product.width} cm`,
   ].filter(Boolean).join(" ").toLowerCase();
 
   return query.toLowerCase().split(/\s+/).filter(Boolean)
     .every((term) => searchable.includes(term));
+}
+
+export function uniqueTraitValues(products, key) {
+  return [...new Set(products.map((product) => product[key]).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+}
+
+export function matchesFabricTrait(product, key, value) {
+  return !value || product[key] === value;
 }
 
 export const weightBands = [

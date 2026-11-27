@@ -2,21 +2,355 @@
 @tailwind components;
 @tailwind utilities;
 
+:root,
+html[data-theme="paper"] {
+  --fb-bg: #f7f5ee;
+  --fb-surface: #ffffff;
+  --fb-surface-muted: #f5f5f4;
+  --fb-ink: #1c1917;
+  --fb-muted: #57534e;
+  --fb-border: #e7e5e4;
+  --fb-brand: #065f46;
+  --fb-brand-strong: #064e3b;
+  --fb-brand-soft: #ecfdf5;
+  --fb-nav: rgba(255, 255, 255, 0.92);
+  --fb-footer: #022c22;
+  --fb-hero: #022c22;
+  --fb-chip: #ffffff;
+  --fb-shadow: 0 1px 2px rgb(28 25 23 / 6%);
+  --fb-on-brand: #ffffff;
+}
+
+html[data-theme="ink"] {
+  --fb-bg: #06140f;
+  --fb-surface: #0d241c;
+  --fb-surface-muted: #113028;
+  --fb-ink: #ecfdf5;
+  --fb-muted: #a7f3d0;
+  --fb-border: #1f4a3b;
+  --fb-brand: #34d399;
+  --fb-brand-strong: #6ee7b7;
+  --fb-brand-soft: #0f3d30;
+  --fb-nav: rgba(6, 20, 15, 0.92);
+  --fb-footer: #020c09;
+  --fb-hero: #020c09;
+  --fb-chip: #113028;
+  --fb-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+  --fb-on-brand: #022c22;
+}
+
 @layer components {
   .display-title {
     font-family: Georgia, "Times New Roman", serif;
     font-weight: 500;
-    letter-spacing: -.045em;
+    letter-spacing: -0.045em;
   }
 
   .paper {
-    background-color: #f7f5ee;
+    background-color: var(--fb-bg);
+    color: var(--fb-ink);
+  }
+
+  .surface {
+    background-color: var(--fb-surface);
+    border-color: var(--fb-border);
+    color: var(--fb-ink);
+  }
+
+  .surface-muted {
+    background-color: var(--fb-surface-muted);
+    color: var(--fb-ink);
+  }
+
+  .theme-text {
+    color: var(--fb-ink);
+  }
+
+  .theme-muted {
+    color: var(--fb-muted);
+  }
+
+  .theme-brand {
+    color: var(--fb-brand);
+  }
+
+  .theme-soft {
+    background-color: var(--fb-brand-soft);
+    color: var(--fb-ink);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition duration-300 active:scale-[0.98];
+    background-color: var(--fb-brand);
+    color: var(--fb-on-brand);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--fb-brand-strong);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border px-5 py-2.5 font-semibold transition duration-300 active:scale-[0.98];
+    border-color: var(--fb-border);
+    background-color: var(--fb-surface);
+    color: var(--fb-ink);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--fb-brand);
+    background-color: var(--fb-brand-soft);
+  }
+
+  .field-input {
+    @apply mt-1 w-full rounded-xl border px-3.5 py-2.5 transition duration-300 focus:outline-none;
+    border-color: var(--fb-border);
+    background-color: var(--fb-surface);
+    color: var(--fb-ink);
+  }
+
+  .field-input:focus {
+    border-color: var(--fb-brand);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--fb-brand) 20%, transparent);
+  }
+
+  .theme-nav {
+    background-color: var(--fb-nav);
+    border-color: var(--fb-border);
+    color: var(--fb-ink);
+  }
+
+  .theme-footer {
+    background-color: var(--fb-footer);
+  }
+
+  .theme-chip {
+    background-color: var(--fb-chip);
+    border-color: var(--fb-border);
+    color: var(--fb-ink);
+  }
+
+  .theme-chip-active {
+    background-color: var(--fb-brand);
+    border-color: var(--fb-brand);
+    color: var(--fb-on-brand);
+  }
+
+  .hover-brand:hover,
+  .hover-brand[aria-current="page"] {
+    color: var(--fb-brand);
+  }
+
+  .menu-hover:hover,
+  .menu-hover:focus {
+    background-color: var(--fb-brand-soft);
+    color: var(--fb-brand);
+  }
+
+  .qty-btn {
+    background-color: var(--fb-surface-muted);
+    color: var(--fb-ink);
+  }
+
+  .qty-btn:hover:not(:disabled) {
+    filter: brightness(0.95);
+  }
+
+  .badge-count {
+    background-color: var(--fb-brand);
+    color: var(--fb-on-brand);
+  }
+
+  .brand-fill {
+    background-color: var(--fb-brand);
+    color: var(--fb-on-brand);
+  }
+
+  .brand-fill:hover:not(:disabled) {
+    background-color: var(--fb-brand-strong);
+  }
+
+  .brand-fill:disabled {
+    background-color: var(--fb-surface-muted);
+    color: var(--fb-muted);
+  }
+}
+
+/* Make existing page Tailwind colors follow the active theme */
+html[data-theme="ink"] .bg-white,
+html[data-theme="ink"] .bg-gray-50,
+html[data-theme="ink"] .bg-stone-50,
+html[data-theme="ink"] .bg-stone-100,
+html[data-theme="ink"] .bg-stone-200 {
+  background-color: var(--fb-surface) !important;
+}
+
+html[data-theme="ink"] .paper,
+html[data-theme="ink"] .surface,
+html[data-theme="ink"] .surface-muted,
+html[data-theme="ink"] .theme-soft,
+html[data-theme="ink"] .theme-chip,
+html[data-theme="ink"] .field-input,
+html[data-theme="ink"] .btn-secondary {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+html[data-theme="ink"] .bg-emerald-50,
+html[data-theme="ink"] .bg-amber-50 {
+  background-color: var(--fb-brand-soft) !important;
+}
+
+html[data-theme="ink"] .text-stone-900,
+html[data-theme="ink"] .text-stone-800,
+html[data-theme="ink"] .text-gray-800,
+html[data-theme="ink"] .text-gray-700,
+html[data-theme="ink"] .text-emerald-950,
+html[data-theme="ink"] .text-emerald-900 {
+  color: var(--fb-ink) !important;
+}
+
+html[data-theme="ink"] .text-stone-600,
+html[data-theme="ink"] .text-stone-500,
+html[data-theme="ink"] .text-gray-600,
+html[data-theme="ink"] .text-gray-500 {
+  color: var(--fb-muted) !important;
+}
+
+html[data-theme="ink"] .text-emerald-800,
+html[data-theme="ink"] .text-emerald-700,
+html[data-theme="ink"] .text-emerald-600 {
+  color: var(--fb-brand) !important;
+}
+
+html[data-theme="ink"] .border-stone-200,
+html[data-theme="ink"] .border-stone-300,
+html[data-theme="ink"] .border-gray-200,
+html[data-theme="ink"] .border-gray-300 {
+  border-color: var(--fb-border) !important;
+}
+
+html[data-theme="ink"] .divide-stone-200 > :not([hidden]) ~ :not([hidden]),
+html[data-theme="ink"] .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--fb-border) !important;
+}
+
+html[data-theme="ink"] .bg-emerald-950,
+html[data-theme="ink"] .bg-emerald-900,
+html[data-theme="ink"] .bg-emerald-800 {
+  background-color: var(--fb-hero) !important;
+  color: #ecfdf5 !important;
+}
+
+html[data-theme="ink"] .bg-emerald-700,
+html[data-theme="ink"] .bg-emerald-600 {
+  background-color: var(--fb-brand) !important;
+  color: var(--fb-on-brand) !important;
+}
+
+html[data-theme="ink"] .hover\:bg-emerald-50:hover,
+html[data-theme="ink"] .hover\:bg-stone-100:hover,
+html[data-theme="ink"] .hover\:bg-stone-200:hover {
+  background-color: var(--fb-surface-muted) !important;
+}
+
+html[data-theme="ink"] .hover\:text-emerald-700:hover,
+html[data-theme="ink"] .hover\:text-emerald-800:hover,
+html[data-theme="ink"] .hover\:text-emerald-900:hover {
+  color: var(--fb-brand-strong) !important;
+}
+
+html[data-theme="ink"] input,
+html[data-theme="ink"] select,
+html[data-theme="ink"] textarea {
+  background-color: var(--fb-surface);
+  color: var(--fb-ink);
+  border-color: var(--fb-border);
+}
+
+html[data-theme="ink"] .shadow-sm,
+html[data-theme="ink"] .shadow,
+html[data-theme="ink"] .shadow-md,
+html[data-theme="ink"] .shadow-lg {
+  box-shadow: var(--fb-shadow) !important;
+}
+
+/* Keep hero/process white CTAs readable on dark panels */
+html[data-theme="ink"] .bg-white.text-emerald-950,
+html[data-theme="ink"] a.bg-white,
+html[data-theme="ink"] button.bg-white {
+  background-color: #ecfdf5 !important;
+  color: #022c22 !important;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #quote-preview,
+  #quote-preview * {
+    visibility: visible !important;
+  }
+
+  #quote-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
   }
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased;
+    background-color: var(--fb-bg);
+    color: var(--fb-ink);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  #root {
+    min-height: 100vh;
+    background-color: var(--fb-bg);
+    color: var(--fb-ink);
+  }
+
+  a,
+  button {
+    @apply transition-colors duration-300;
+  }
+
+  img,
+  video {
+    @apply transition-transform duration-700 ease-soft;
+  }
+
   :focus-visible {
-    outline: 2px solid #0f766e;
+    outline: 2px solid var(--fb-brand);
     outline-offset: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

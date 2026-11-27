@@ -32,28 +32,29 @@ const swatches = [
 ];
 
 const sampleSpecifications = {
-  "cotton-poplin": [2, ["Shirting", "Dresses"], "Machine wash cold with similar colours. Line dry and iron while slightly damp."],
-  "cotton-twill": [3, ["Trousers", "Outerwear"], "Machine wash cold and line dry. Iron on medium heat."],
-  "mulberry-silk": [1, ["Occasionwear", "Accessories"], "Professional dry cleaning recommended. Press on low heat through a cloth."],
-  "silk-organza": [1, ["Occasionwear", "Dresses"], "Professional dry cleaning recommended. Press on low heat without steam."],
-  "linen-herringbone": [2, ["Tailoring", "Home textiles"], "Machine wash gently at 30°C. Line dry and iron while damp."],
-  "washed-linen": [3, ["Accessories", "Home textiles", "Outerwear"], "Machine wash gently at 30°C. Line dry."],
-  "selvedge-denim": [3, ["Trousers", "Outerwear"], "Wash inside out in cold water with dark colours. Line dry."],
-  "lightweight-denim": [2, ["Shirting", "Dresses"], "Machine wash cold, inside out. Avoid high dryer heat."],
-  "wool-flannel": [2, ["Trousers", "Tailoring"], "Professional dry cleaning recommended. Air between wears."],
-  "wool-coating": [2, ["Outerwear"], "Professional dry cleaning recommended. Do not tumble dry."],
-  "performance-ripstop": [2, ["Activewear", "Accessories", "Linings"], "Machine wash cold on a gentle cycle. Line dry."],
-  "modal-jersey": [2, ["Shirting", "Dresses"], "Machine wash cold on a gentle cycle. Dry flat."],
+  "cotton-poplin": [2, ["Shirting", "Dresses"], "Machine wash cold with similar colours. Line dry and iron while slightly damp.", { colour: "White", finish: "Crisp", stretch: "None" }],
+  "cotton-twill": [3, ["Trousers", "Outerwear"], "Machine wash cold and line dry. Iron on medium heat.", { colour: "Sand", finish: "Matte", stretch: "None" }],
+  "mulberry-silk": [1, ["Occasionwear", "Accessories"], "Professional dry cleaning recommended. Press on low heat through a cloth.", { colour: "Ivory", finish: "Satin", stretch: "None" }],
+  "silk-organza": [1, ["Occasionwear", "Dresses"], "Professional dry cleaning recommended. Press on low heat without steam.", { colour: "Pearl", finish: "Sheer", stretch: "None" }],
+  "linen-herringbone": [2, ["Tailoring", "Home textiles"], "Machine wash gently at 30°C. Line dry and iron while damp.", { colour: "Natural", finish: "Textured", stretch: "None" }],
+  "washed-linen": [3, ["Accessories", "Home textiles", "Outerwear"], "Machine wash gently at 30°C. Line dry.", { colour: "Natural", finish: "Washed", stretch: "None" }],
+  "selvedge-denim": [3, ["Trousers", "Outerwear"], "Wash inside out in cold water with dark colours. Line dry.", { colour: "Indigo", finish: "Selvedge", stretch: "None" }],
+  "lightweight-denim": [2, ["Shirting", "Dresses"], "Machine wash cold, inside out. Avoid high dryer heat.", { colour: "Blue", finish: "Soft", stretch: "Slight" }],
+  "wool-flannel": [2, ["Trousers", "Tailoring"], "Professional dry cleaning recommended. Air between wears.", { colour: "Charcoal", finish: "Brushed", stretch: "None" }],
+  "wool-coating": [2, ["Outerwear"], "Professional dry cleaning recommended. Do not tumble dry.", { colour: "Heather", finish: "Dense", stretch: "None" }],
+  "performance-ripstop": [2, ["Activewear", "Accessories", "Linings"], "Machine wash cold on a gentle cycle. Line dry.", { colour: "Slate", finish: "Technical", stretch: "None" }],
+  "modal-jersey": [2, ["Shirting", "Dresses"], "Machine wash cold on a gentle cycle. Dry flat.", { colour: "Willow", finish: "Soft", stretch: "Moderate" }],
 };
 
 export const sampleProducts = swatches.map(([
   slug, name, category, material, price, gsm, width, stockCount, description, discountPrice,
 ], index) => {
-  const [minimumOrderQuantity, intendedUses, careInstructions] = sampleSpecifications[slug];
+  const [minimumOrderQuantity, intendedUses, careInstructions, traits] = sampleSpecifications[slug];
   const imageUrl = fabricCategories.find((fabric) => fabric.name === category).image;
   return {
     _id: `sample-${slug}`, name, category, material, price, discountPrice, gsm, width,
     priceUnit: "metre", minimumOrderQuantity, intendedUses, careInstructions,
+    colour: traits.colour, finish: traits.finish, stretch: traits.stretch,
     stockCount, inStock: stockCount > 0, imageUrl, description, sample: true,
     isFeatured: [0, 2, 4, 6].includes(index),
     createdAt: new Date(Date.UTC(2026, 0, swatches.length - index)).toISOString(),
@@ -62,7 +63,8 @@ export const sampleProducts = swatches.map(([
 
 export const fabricFaq = [
   { question: "How do I get a quote?", answer: "Add fabrics to your cart, choose the quantities, and submit your email with any project notes. Include your timeline or destination when it affects your request." },
-  { question: "Can I ask for fabric swatches?", answer: "Select the swatch inquiry topic and include the fabric names and colors you are evaluating." },
+  { question: "Can I ask for fabric swatches?", answer: "Use the Swatch request page to select saved fabrics, or open Contact with the swatch inquiry topic." },
   { question: "What does GSM mean?", answer: "Grams per square metre describes fabric weight. Compare GSM alongside the weave and fibre to judge how a textile might drape or feel." },
+  { question: "How do I estimate metres needed?", answer: "Open the Size / MOQ calculator, enter garment count, metres per garment, and wastage. Compare the result with each fabric’s minimum order." },
   { question: "Can I browse without a backend?", answer: "Run the local demo or choose Browse sample fabrics in the catalog. You can build and download a quote request using sample fabrics." },
 ];
